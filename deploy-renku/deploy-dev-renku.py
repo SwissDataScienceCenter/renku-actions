@@ -153,12 +153,6 @@ if __name__ == "__main__":
         default=os.environ.get("extra_values"),
     )
     parser.add_argument("--release", help="Release name", default=os.environ.get("RENKU_RELEASE"))
-    parser.add_argument(
-        "--anonymous-sessions",
-        help='Enable anonymous sessions by setting to "true"',
-        action="store_true",
-        default=os.environ.get("RENKU_ANONYMOUS_SESSIONS") == "true",
-    )
 
     args = parser.parse_args()
     component_versions = {a: b for a, b in vars(args).items() if a.replace("_", "-") in components}
@@ -224,28 +218,5 @@ if __name__ == "__main__":
         helm_command,
         cwd=renku_dir / "helm-chart",
     )
-
-    # enable anonymous notebooks if needed
-    if args.anonymous_sessions:
-        from deploy_tmp_notebooks import (
-            deploy_tmp_notebooks,
-            check_notebooks_chart_version,
-        )
-
-        renku_notebooks_version = component_versions.get("renku_notebooks") or check_notebooks_chart_version(
-            renku_chart_path=renku_dir / "helm-chart"
-        )
-
-        local_path = (
-            tempdir / "renku-notebooks/helm-chart/renku-notebooks" if renku_notebooks_version.startswith("@") else None
-        )
-
-        deploy_tmp_notebooks(
-            release,
-            namespace,
-            renku_notebooks_version,
-            namespace + "-tmp",
-            local_path=local_path,
-        )
 
     tempdir_.cleanup()
