@@ -1,0 +1,8 @@
+name: "generate-crd-docs"
+description: "Generate Markdown documentation from CRDs. Uses https://github.com/fybrik/crdoc."
+runs:
+  using: "docker"
+  image: "Dockerfile"
+branding:
+  icon: "activity"
+  color: "blue"
