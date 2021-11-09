@@ -26,19 +26,15 @@ if [[ -n "$GITLAB_TOKEN" ]]; then
   yq w -i $RENKU_VALUES_FILE "gateway.gitlabClientSecret" "$APP_SECRET"
 fi
 
-# create the namespace in a Rancher project
-if [[ -n "$RANCHER_PROJECT_ID" ]]; then
-  NAMESPACE_EXISTS=$( curl -s -H "Authorization: Bearer $RENKUBOT_RANCHER_BEARER_TOKEN" \
-        -X GET \
-        -d "projectId=${RANCHER_PROJECT_ID}" \
-        "${RANCHER_DEV_API_ENDPOINT}/namespaces"| grep $RENKU_NAMESPACE)
-  if [[ -n NAMESPACE_EXISTS ]]; then
-    curl -s -H "Authorization: Bearer $RENKUBOT_RANCHER_BEARER_TOKEN" \
-        -X POST \
-        -d "name=${RENKU_NAMESPACE}" \
-        -d "projectId=${RANCHER_PROJECT_ID}" \
-        "${RANCHER_DEV_API_ENDPOINT}/namespaces"
-  fi
+NAMESPACE_EXISTS=$( curl -s -H "Authorization: Bearer $RENKUBOT_RANCHER_BEARER_TOKEN" \
+      -X GET \
+      "${RANCHER_DEV_API_ENDPOINT}/namespaces?projectId=${RANCHER_PROJECT_ID}"| grep $RENKU_NAMESPACE)
+if [[ ! -n $NAMESPACE_EXISTS ]]; then
+  curl -s -H "Authorization: Bearer $RENKUBOT_RANCHER_BEARER_TOKEN" \
+      -X POST \
+      -d "name=${RENKU_NAMESPACE}" \
+      -d "projectId=${RANCHER_PROJECT_ID}" \
+      "${RANCHER_DEV_API_ENDPOINT}/namespaces"
 fi
 
 # deploy renku - reads config from environment variables
