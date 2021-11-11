@@ -33,6 +33,10 @@ if [ ! -z "$IMAGE_PREFIX" ]; then
   IMAGE_PREFIX="--image-prefix ${IMAGE_PREFIX}"
 fi
 
+if [ -z "$CHARTPRESS_SPEC_DIR" ]; then
+  CHARTPRESS_SPEC_DIR="."
+fi
+
 # set up git
 git config --global user.email "$GIT_EMAIL"
 git config --global user.name "$GIT_USER"
@@ -43,4 +47,5 @@ helm dep update $CHART_DIR/$CHART_NAME
 echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
 
 # build and push the chart and images
+cd $CHARTPRESS_SPEC_DIR
 chartpress --push --publish-chart $CHART_TAG $IMAGE_PREFIX

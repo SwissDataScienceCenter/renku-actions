@@ -26,12 +26,13 @@ published to.
 
 You can set these environment variables:
 
-| Variable name | Default | Required |
-| --------------| --------| ---------|
-| CHART_DIR    | helm-chart/ | No |
-| DOCKER_PASSWORD | None | Yes |
-| DOCKER_USERNAME | None | Yes |
-| GIT_EMAIL     | None | Yes |
-| GIT_USER      | None | Yes |
-| GITHUB_TOKEN  | None | Yes |
-| IMAGE_PREFIX  | None | No  |
+| Variable name        | Default     | Required |
+| -------------------- | ----------- | ---------|
+| CHART_DIR            | helm-chart/ | No       |
+| DOCKER_PASSWORD      | None        | Yes      |
+| DOCKER_USERNAME      | None        | Yes      |
+| GIT_EMAIL            | None        | Yes      |
+| GIT_USER             | None        | Yes      |
+| GITHUB_TOKEN         | None        | Yes      |
+| IMAGE_PREFIX         | None        | No       |
+| CHARTPRESS_SPEC_DIR  | .           | No       |
