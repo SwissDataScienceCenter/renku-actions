@@ -28,7 +28,8 @@ fi
 
 NAMESPACE_EXISTS=$( curl -s -H "Authorization: Bearer $RENKUBOT_RANCHER_BEARER_TOKEN" \
       -X GET \
-      "${RANCHER_DEV_API_ENDPOINT}/namespaces?projectId=${RANCHER_PROJECT_ID}"| grep $RENKU_NAMESPACE)
+      -d "projectId=${RANCHER_PROJECT_ID}" \
+      "${RANCHER_DEV_API_ENDPOINT}/namespaces"| grep $RENKU_NAMESPACE)
 if [[ ! -n $NAMESPACE_EXISTS ]]; then
   curl -s -H "Authorization: Bearer $RENKUBOT_RANCHER_BEARER_TOKEN" \
       -X POST \
