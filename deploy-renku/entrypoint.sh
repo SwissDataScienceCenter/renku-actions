@@ -26,12 +26,12 @@ if [[ -n "$GITLAB_TOKEN" ]]; then
   yq w -i $RENKU_VALUES_FILE "gateway.gitlabClientSecret" "$APP_SECRET"
 fi
 
-NAMESPACE_EXISTS=$( curl -f -s -H "Authorization: Bearer $RENKUBOT_RANCHER_BEARER_TOKEN" \
+NAMESPACE_EXISTS=$( curl -s -H "Authorization: Bearer $RENKUBOT_RANCHER_BEARER_TOKEN" \
       -X GET \
       -d "projectId=${RANCHER_PROJECT_ID}" \
-      "${RANCHER_DEV_API_ENDPOINT}/namespaces"| grep $RENKU_NAMESPACE)
-if [[ ! -n $NAMESPACE_EXISTS ]]; then
-  curl -f -s -H "Authorization: Bearer $RENKUBOT_RANCHER_BEARER_TOKEN" \
+      "${RANCHER_DEV_API_ENDPOINT}/namespaces" | grep $RENKU_NAMESPACE)
+if test -z "$NAMESPACE_EXISTS" ; then
+  curl -s -H "Authorization: Bearer $RENKUBOT_RANCHER_BEARER_TOKEN" \
       -X POST \
       -d "name=${RENKU_NAMESPACE}" \
       -d "projectId=${RANCHER_PROJECT_ID}" \
