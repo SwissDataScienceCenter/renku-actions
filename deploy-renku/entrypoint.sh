@@ -12,7 +12,7 @@ echo "$RENKUBOT_KUBECONFIG" > "$KUBECONFIG" && chmod 400 "$KUBECONFIG"
 printf "%s" "$RENKU_VALUES" | sed "s/<replace>/${RENKU_RELEASE}/" > $RENKU_VALUES_FILE
 
 # register the GitLab app
-if [[ -n "$GITLAB_TOKEN" ]]; then
+if test -n "$GITLAB_TOKEN" ; then
   gitlab_app=$(curl -s -X POST https://dev.renku.ch/gitlab/api/v4/applications \
                         -H "private-token: $GITLAB_TOKEN" \
                         --data "name=${RENKU_RELEASE}" \
@@ -28,8 +28,8 @@ fi
 
 NAMESPACE_EXISTS=$( curl -s -H "Authorization: Bearer $RENKUBOT_RANCHER_BEARER_TOKEN" \
       -X GET \
-      "${RANCHER_DEV_API_ENDPOINT}/namespaces?projectId=${RANCHER_PROJECT_ID}"| grep $RENKU_NAMESPACE)
-if [[ ! -n $NAMESPACE_EXISTS ]]; then
+      "${RANCHER_DEV_API_ENDPOINT}/namespaces?projectId=${RANCHER_PROJECT_ID}" | grep $RENKU_NAMESPACE)
+if test -z "$NAMESPACE_EXISTS" ; then
   curl -s -H "Authorization: Bearer $RENKUBOT_RANCHER_BEARER_TOKEN" \
       -X POST \
       -d "name=${RENKU_NAMESPACE}" \
