@@ -29,7 +29,7 @@ jobs:
     - name: Submit PR
       uses: peter-evans/create-pull-request@v3
       with:
-        token: ${{ secrets.RENKUBOT_GITHUB_TOKEN }}
+        token: ${{ secrets.RENKU_ACTIONS_GITHUB_TOKEN }}
         commit-message: "chore(ci): Update renku actions to ${{ env.NEW_VERSION }}"
         title: "chore(ci): Update renku actions to ${{ env.NEW_VERSION }}"
         branch: "chore-update-renku-action-${{ env.NEW_VERSION }}"
