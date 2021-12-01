@@ -3,16 +3,23 @@ name: Update renku actions
 on:
   release:
     types: [published]
-  push:
-    tags:
-      - '*'
 
 jobs:
   update-renku-actions:
     strategy:
       matrix:
         repo:
+          - name: SwissDataScienceCenter/renku
+            ref: master
           - name: SwissDataScienceCenter/renku-notebooks
+            ref: master
+          - name: SwissDataScienceCenter/renku-python
+            ref: master
+          - name: SwissDataScienceCenter/renku-ui
+            ref: master
+          - name: SwissDataScienceCenter/renku-gateway
+            ref: master
+          - name: SwissDataScienceCenter/renku-graph
             ref: master
     runs-on: ubuntu-latest
     steps:
@@ -25,7 +32,7 @@ jobs:
         ref: ${{ matrix.repo.ref }}
         fetch-depth: 1
     - name: Update actions version
-      uses: SwissDataScienceCenter/renku-actions/update-renku-actions@feat-auto-update-actions
+      uses: SwissDataScienceCenter/renku-actions/update-renku-actions@v0.3.2
     - name: Submit PR
       uses: peter-evans/create-pull-request@v3
       with:
