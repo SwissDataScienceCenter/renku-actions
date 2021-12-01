@@ -34,3 +34,5 @@ jobs:
         title: "chore(ci): Update renku actions to ${{ env.NEW_VERSION }}"
         branch: "chore-update-renku-action-${{ env.NEW_VERSION }}"
         delete-branch: true
+        author: "Renku Bot <renku@datascience.ch>"
+        committer: "Renku Bot <renku@datascience.ch>"
