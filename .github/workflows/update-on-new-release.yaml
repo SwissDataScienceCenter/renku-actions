@@ -1,0 +1,45 @@
+name: Update renku actions
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-renku-actions:
+    strategy:
+      matrix:
+        repo:
+          - name: SwissDataScienceCenter/renku
+            ref: master
+          - name: SwissDataScienceCenter/renku-notebooks
+            ref: master
+          - name: SwissDataScienceCenter/renku-python
+            ref: master
+          - name: SwissDataScienceCenter/renku-ui
+            ref: master
+          - name: SwissDataScienceCenter/renku-gateway
+            ref: master
+          - name: SwissDataScienceCenter/renku-graph
+            ref: master
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get release tag
+      run: echo "NEW_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ matrix.repo.name }}
+        ref: ${{ matrix.repo.ref }}
+        fetch-depth: 1
+    - name: Update actions version
+      uses: SwissDataScienceCenter/renku-actions/update-renku-actions@v0.3.2
+    - name: Submit PR
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token: ${{ secrets.RENKU_ACTIONS_GITHUB_TOKEN }}
+        commit-message: "chore(ci): Update renku actions to ${{ env.NEW_VERSION }}"
+        title: "chore(ci): Update renku actions to ${{ env.NEW_VERSION }}"
+        branch: "chore-update-renku-action-${{ env.NEW_VERSION }}"
+        delete-branch: true
+        author: "Renku Bot <renku@datascience.ch>"
+        committer: "Renku Bot <renku@datascience.ch>"

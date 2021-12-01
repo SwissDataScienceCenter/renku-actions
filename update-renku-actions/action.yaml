@@ -1,0 +1,8 @@
+name: 'update-renku-actions'
+description: 'Update Renku Actions'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+branding:
+  icon: 'activity'
+  color: 'blue'
