@@ -25,7 +25,7 @@ jobs:
         ref: ${{ matrix.repo.ref }}
         fetch-depth: 1
     - name: Update actions version
-      uses: SwissDataScienceCenter/renku-actions/deploy-renku@feat-auto-update-actions
+      uses: SwissDataScienceCenter/renku-actions/update-renku-actions@feat-auto-update-actions
     - name: Submit PR
       uses: peter-evans/create-pull-request@v3
       with:
