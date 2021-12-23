@@ -10,8 +10,6 @@ if test -z "$GITLAB_TOKEN" ; then
     exit 1
 fi
 
-echo "$RENKUBOT_KUBECONFIG" > "$KUBECONFIG" && chmod 400 "$KUBECONFIG"
-
 KUBECONFIG=${KUBECONFIG:-"/.kubeconfig"}
 HELM_CI_RELEASE_REGEX=".+-ci-.+|^ci-.+"
 HELM_RELEASE_REGEX="${HELM_RELEASE_REGEX:=".*"}"
@@ -19,6 +17,7 @@ K8S_CI_NAMESPACE_REGEX=".+-ci-.+|^ci-.+"
 MAX_AGE_SECONDS=${MAX_AGE_SECONDS:=604800}
 GITLAB_URL="https://dev.renku.ch/gitlab"
 
+echo "$RENKUBOT_KUBECONFIG" > "$KUBECONFIG" && chmod 400 "$KUBECONFIG"
 echo "Looking for CI releases with regex $HELM_RELEASE_REGEX."
 echo "Looking in namespaces with regex $K8S_CI_NAMESPACE_REGEX."
 echo "Age threshold for deletion is $MAX_AGE_SECONDS seconds."
