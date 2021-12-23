@@ -10,7 +10,7 @@ if test -z "$GITLAB_TOKEN" ; then
     exit 1
 fi
 
-KUBECONFIG=${KUBECONFIG:-"/.kubeconfig"}
+KUBECONFIG=${KUBECONFIG:-"$PWD/.kubeconfig"}
 HELM_CI_RELEASE_REGEX=".+-ci-.+|^ci-.+"
 HELM_RELEASE_REGEX="${HELM_RELEASE_REGEX:=".*"}"
 K8S_CI_NAMESPACE_REGEX=".+-ci-.+|^ci-.+"
