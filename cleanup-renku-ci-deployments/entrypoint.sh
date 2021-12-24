@@ -17,6 +17,7 @@ K8S_CI_NAMESPACE_REGEX=".+-ci-.+|^ci-.+"
 MAX_AGE_SECONDS=${MAX_AGE_SECONDS:=604800}
 GITLAB_URL="https://dev.renku.ch/gitlab"
 KUBECONFIG_LINES=$(wc -l $KUBECONFIG)
+DELETE_NAMESPACE=${DELETE_NAMESPACE:="true"}
 
 echo "$RENKUBOT_KUBECONFIG" > "$KUBECONFIG" && chmod 400 "$KUBECONFIG"
 echo "Kubeconfig is at $KUBECONFIG."
@@ -24,6 +25,7 @@ echo "Kubeconfig is $KUBECONFIG_LINES long."
 echo "Looking for CI releases with regex $HELM_RELEASE_REGEX."
 echo "Looking in namespaces with regex $K8S_CI_NAMESPACE_REGEX."
 echo "Age threshold for deletion is $MAX_AGE_SECONDS seconds."
+echo "Delete namespace: $DELETE_NAMESPACE"
 
 # get a list of all applicable namespaces
 NAMESPACES=$(kubectl get namespaces -o json | jq -r ".items | map(.metadata.name | select(test(\"$K8S_CI_NAMESPACE_REGEX\"))) | .[]")
@@ -60,9 +62,12 @@ do
             # wait for helm release to be fully deleted
             kubectl -n $NAMESPACE get deployments -o json | jq -r '.items | .[].metadata.name' | xargs -r kubectl -n $NAMESPACE wait --for=delete deployment
             kubectl -n $NAMESPACE get statefulsets -o json | jq -r '.items | .[].metadata.name' | xargs -r kubectl -n $NAMESPACE wait --for=delete statefulset
-            # remove the namespace
-            echo "Deleting namespace $NAMESPACE"
-            kubectl delete namespace $NAMESPACE --wait
+            if [ "$DELETE_NAMESPACE" = "true" ] 
+            then
+                # remove the namespace
+                echo "Deleting namespace $NAMESPACE"
+                kubectl delete namespace $NAMESPACE --wait
+            fi
         else
             echo "Release $RELEASE in namespace $NAMESPACE age is $AGE_SECONDS, not >= to $MAX_AGE_SECONDS, skipping."
         fi
