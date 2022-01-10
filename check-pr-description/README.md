@@ -37,7 +37,7 @@ You may pass in additional ad-hoc values to the deployment by using the `extra-v
 For example:
 
 ```
-/deploy extra-values="tests.image.ref=my-test,core.sentry.env=feature"
+/deploy extra-values="tests.image.tag=my-test,core.sentry.env=feature"
 ```
 
 Note that you can pass in multiple values, but they must be in the same string,
