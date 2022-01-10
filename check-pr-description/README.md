@@ -3,17 +3,17 @@
 This action looks for a specific string in the target PR description and an
 optional command following it.
 
-## Command
+## Usage
 
 The command is made by multiple sections separated by a space, and it terminates
-with the end of the line.
+with the end of the line. The action is triggered by using `/deploy` at the beginning
+of a line in the PR description.
 
-A section is made by one of the following:
+### Specifying component versions
 
-- A renku component name followed by `=<ref>`, where `<ref>` is any valid reference
-  like a tag or a branch name (E.G. `renku-ui=0.11.9` or
-  `renku-notebooks=debug-with-vscode-k8s`).
-- The string `#notest`.
+A renku component name followed by `=<ref>`, where `<ref>` is any valid
+reference like a tag or a branch name (E.G. `renku-ui=0.11.9` or
+`renku-notebooks=debug-with-vscode-k8s`).
 
 The supported components are:
 - `renku`
@@ -24,26 +24,35 @@ The supported components are:
 - `renku-ui` (that includes the `renku-ui-server` component, since the version is
   aligned between the 2 components)
 
-The reference will be stored in an output variable with the same name.
-
-The `#notest` string will falsify the otherwise truthy variable named `test-enabled`.
-
-Keep in mind that:
-- Unknown sections are skipped.
-- The order plays no role unless you define multiple references for the same
-  component. In that case, only the first is considered. It would be best if you
-  tried to avoid any repetition.
-
-## How to use that
-
-This action is meant to be used in combination with the other actions from this
-repository to simplify deploying a testing environment for pull requests.
-
-The string should look like the following:
+The reference will be stored in an output variable with the same name. For example,
 
 ```
-/deploy #notest renku-ui=0.11.9
+/deploy renku-ui=0.11.9 renku=master
 ```
 
-Further information can be found here:
-https://renku.readthedocs.io/en/latest/developer/contributing/pull-requests.html
+will deploy the tag `0.11.9` of `renku-ui` and the tip of the `master` branch of `renku`.
+### Passing in additional values
+
+You may pass in additional ad-hoc values to the deployment by using the `extra-values` option.
+For example:
+
+```
+/deploy extra-values="tests.image.tag=my-test,core.sentry.env=feature"
+```
+
+Note that you can pass in multiple values, but they must be in the same string,
+separated by a comma and without whitespaces.
+
+### Skipping tests
+
+The `#notest` string will falsify the otherwise truthy variable named `test-enabled`,
+for example
+
+```
+/deploy renku-ui=0.11.9 #notest
+```
+
+## Procedures for renku platform PRs
+
+The process for using this action in renku PR reviews is outlined here:
+https://renku.readthedocs.io/en/latest/how-to-guides/contributing/pull-requests.html
