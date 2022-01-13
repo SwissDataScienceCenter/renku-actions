@@ -17,7 +17,7 @@ K8S_CI_NAMESPACE_REGEX=".+-ci-.+|^ci-.+"
 MAX_AGE_SECONDS=${MAX_AGE_SECONDS:=604800}
 GITLAB_URL="https://dev.renku.ch/gitlab"
 KUBECONFIG_LINES=$(wc -l $KUBECONFIG)
-DELETE_NAMESPACE=${DELETE_NAMESPACE:="true"}
+DELETE_NAMESPACE=${DELETE_NAMESPACE:="false"}
 
 echo "$RENKUBOT_KUBECONFIG" > "$KUBECONFIG" && chmod 400 "$KUBECONFIG"
 echo "Kubeconfig is at $KUBECONFIG."
@@ -27,15 +27,15 @@ echo "Looking in namespaces with regex $K8S_CI_NAMESPACE_REGEX."
 echo "Age threshold for deletion is $MAX_AGE_SECONDS seconds."
 echo "Delete namespace: $DELETE_NAMESPACE"
 
-# get a list of all applicable namespaces
-NAMESPACES=$(kubectl get namespaces -o json | jq -r ".items | map(.metadata.name | select(test(\"$K8S_CI_NAMESPACE_REGEX\"))) | .[]")
 NOW=$(date +%s)
-for NAMESPACE in $NAMESPACES
+# get a list of all applicable releases
+REALEASES_JSON=$(helm list --all-namespaces --all -f "$HELM_CI_RELEASE_REGEX" -o json | jq -cr ".[]")
+for RELEASE_JSON in $REALEASES_JSON
 do
-    # get a list of all applicable releases
-    RELEASES=$(helm -n $NAMESPACE list --all -f "$HELM_CI_RELEASE_REGEX" -o json | jq -r " map(.name | select(test(\"$HELM_RELEASE_REGEX\"))) | .[]")
-    for RELEASE in $RELEASES
-    do
+    RELEASE=$(echo $RELEASE_JSON | jq -r "if .name | test(\"$HELM_RELEASE_REGEX\") then .name else \"\" end")
+    NAMESPACE=$(echo $RELEASE_JSON | jq -r jq -r "if .namespace | test(\"$K8S_CI_NAMESPACE_REGEX\") then .namespace else \"\" end")
+    if [ ! -z $RELEASE ] || [ ! -z $NAMESPACE ]
+    then
         echo "Checking release $RELEASE in namespace $NAMESPACE."
         # extract last deployed date and convert to unix epoch
         LAST_DEPLOYED_AT=$(helm -n $NAMESPACE history $RELEASE -o json | jq -r 'last | .updated | sub("\\.[0-9]{6}.*$"; "Z") | fromdateiso8601')
@@ -71,5 +71,7 @@ do
         else
             echo "Release $RELEASE in namespace $NAMESPACE age is $AGE_SECONDS, not >= to $MAX_AGE_SECONDS, skipping."
         fi
-    done
+    else
+        echo "Release $RELEASE does not match regex $HELM_RELEASE_REGEX and/or $NAMEPSACE does not match regex $K8S_CI_NAMESPACE_REGEX. Skipping."
+    fi
 done

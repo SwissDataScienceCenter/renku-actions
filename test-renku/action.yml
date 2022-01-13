@@ -47,21 +47,12 @@ runs:
       with:
         name: acceptance-test-artifacts
         path: ${{ github.workspace }}/test-artifacts/
-    - name: "Cleanup CI deployment after test failure"
+    - name: "Cleanup CI deployment after test if persist flag set to false"
       uses: SwissDataScienceCenter/renku-actions/cleanup-renku-ci-deployments@test-and-cleanup-action
-      if: ${{ failure() && inputs.persist == 'false' }}
+      if: ${{ inputs.persist == 'false' }}
       env:
         RENKUBOT_KUBECONFIG: ${{ inputs.renkubot-kubeconfig }}
         HELM_RELEASE_REGEX: "^${{ inputs.renku-release }}$"
         MAX_AGE_SECONDS: "0"
         GITLAB_TOKEN: ${{ inputs.gitlab-token }}
         DELETE_NAMESPACE: "false"
-    - name: "Cleanup CI deployment after test success"
-      uses: SwissDataScienceCenter/renku-actions/cleanup-renku-ci-deployments@test-and-cleanup-action
-      if: ${{ !failure() && inputs.persist == 'false' }}
-      env:
-        RENKUBOT_KUBECONFIG: ${{ inputs.renkubot-kubeconfig }}
-        HELM_RELEASE_REGEX: "^${{ inputs.renku-release }}$"
-        MAX_AGE_SECONDS: "0"
-        GITLAB_TOKEN: ${{ inputs.gitlab-token }}
-        DELETE_NAMESPACE: "true"
