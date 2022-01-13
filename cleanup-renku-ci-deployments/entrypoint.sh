@@ -29,12 +29,13 @@ echo "Delete namespace: $DELETE_NAMESPACE"
 
 NOW=$(date +%s)
 # get a list of all applicable releases
-REALEASES_JSON=$(helm list --all-namespaces --all -f "$HELM_CI_RELEASE_REGEX" -o json | jq -cr ".[]")
-for RELEASE_JSON in $REALEASES_JSON
+RELEASES_JSON=$(helm list --all-namespaces --all -f "$HELM_CI_RELEASE_REGEX" -o json | jq -cr "map(select((.name | test(\"$HELM_RELEASE_REGEX\")) and (.namespace | test(\"$K8S_CI_NAMESPACE_REGEX\"))))")
+RELEASES_JSON_INDS=$(echo $RELEASES_JSON | jq -r 'length as $arr_len | range($arr_len)')
+for RELEASE_JSON_IND in $RELEASES_JSON_INDS
 do
-    RELEASE=$(echo $RELEASE_JSON | jq -r "if .name | test(\"$HELM_RELEASE_REGEX\") then .name else \"\" end")
-    NAMESPACE=$(echo $RELEASE_JSON | jq -r jq -r "if .namespace | test(\"$K8S_CI_NAMESPACE_REGEX\") then .namespace else \"\" end")
-    if [ ! -z $RELEASE ] || [ ! -z $NAMESPACE ]
+    RELEASE=$(echo $RELEASES_JSON | jq -r ".[$RELEASE_JSON_IND].name")
+    NAMESPACE=$(echo $RELEASES_JSON | jq -r ".[$RELEASE_JSON_IND].namespace")
+    if [ ! -z $RELEASE ] && [ ! -z $NAMESPACE ]
     then
         echo "Checking release $RELEASE in namespace $NAMESPACE."
         # extract last deployed date and convert to unix epoch
@@ -72,6 +73,6 @@ do
             echo "Release $RELEASE in namespace $NAMESPACE age is $AGE_SECONDS, not >= to $MAX_AGE_SECONDS, skipping."
         fi
     else
-        echo "Release $RELEASE does not match regex $HELM_RELEASE_REGEX and/or $NAMEPSACE does not match regex $K8S_CI_NAMESPACE_REGEX. Skipping."
+        echo "Release $RELEASE and/or $NAMEPSACE are empty. Skipping."
     fi
 done
