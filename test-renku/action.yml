@@ -49,7 +49,7 @@ runs:
         path: ${{ github.workspace }}/test-artifacts/
     - name: "Cleanup CI deployment after test if persist flag set to false"
       uses: SwissDataScienceCenter/renku-actions/cleanup-renku-ci-deployments@test-and-cleanup-action
-      if: ${{ inputs.persist == 'false' }}
+      if: ${{ always() && inputs.persist == 'false' }}
       env:
         RENKUBOT_KUBECONFIG: ${{ inputs.renkubot-kubeconfig }}
         HELM_RELEASE_REGEX: "^${{ inputs.renku-release }}$"
