@@ -11,11 +11,11 @@ This is a composite action that:
 steps:
 - uses: SwissDataScienceCenter/renku-actions/test-renku
   with:
-  renkubot-kubeconfig: ${{ secrets.RENKUBOT_DEV_KUBECONFIG }}
-  renku-release: ci-renku-${{ github.event.number }}
-  gitlab-token: ${{ secrets.DEV_GITLAB_TOKEN }}
-  persist: "${{ needs.check-deploy.outputs.persist }}"
-  ci-renku-values: ${{ secrets.CI_RENKU_VALUES }}
+    renkubot-kubeconfig: ${{ secrets.RENKUBOT_DEV_KUBECONFIG }}
+    renku-release: ci-renku-${{ github.event.number }}
+    gitlab-token: ${{ secrets.DEV_GITLAB_TOKEN }}
+    persist: "${{ needs.check-deploy.outputs.persist }}"
+    ci-renku-values: ${{ secrets.CI_RENKU_VALUES }}
 ```
 
 ## Inputs
