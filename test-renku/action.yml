@@ -1,0 +1,58 @@
+name: "test-renku"
+description: "Run the acceptance tests for a Renku CI deployment"
+inputs:
+  renkubot-kubeconfig:
+    description: "The contents of the kubeconfig file to be used for helm/kubectl commands."
+    required: true
+  renku-release:
+    description: "The name of the helm release."
+    required: true
+  gitlab-token:
+    description: "A gitlab token used for the cleanup of application in Gitlab."
+    required: true  
+  persist:
+    description: "Whether the CI deployment should be kept after the tests finish or not."
+    required: false
+    default: "false"
+  test-timeout-mins:
+    description: "The timeout in mins to wait for the helm tests to complete."
+    required: false
+    default: "60"
+  ci-renku-values:
+    description: "The helm values file contents used to deploy renku, used here only to extract the S3 bucket credentials."
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: "Setup Helm"
+      uses: azure/setup-helm@v1
+      with:
+        version: "3.6.3"
+    - name: "Run tests"
+      run: ${{ github.action_path }}/entrypoint.sh
+      shell: bash
+      env:
+        RENKUBOT_KUBECONFIG: ${{ inputs.renkubot-kubeconfig }}
+        RENKU_RELEASE: ${{ inputs.renku-release }}
+        TEST_TIMEOUT_MINS: ${{ inputs.test-timeout-mins }}
+    - name: Download artifact for packaging on failure
+      if: failure()
+      uses: SwissDataScienceCenter/renku-actions/download-test-artifacts@test-and-cleanup-action
+      env:
+        RENKU_VALUES: ${{ inputs.ci-renku-values }}
+        TEST_ARTIFACTS_PATH: "tests-artifacts-${{ github.sha }}"
+    - name: Upload screenshots on failure
+      if: failure()
+      uses: actions/upload-artifact@v1
+      with:
+        name: acceptance-test-artifacts
+        path: ${{ github.workspace }}/test-artifacts/
+    - name: "Cleanup CI deployment after test if persist flag set to false"
+      uses: SwissDataScienceCenter/renku-actions/cleanup-renku-ci-deployments@test-and-cleanup-action
+      if: ${{ always() && inputs.persist == 'false' }}
+      env:
+        RENKUBOT_KUBECONFIG: ${{ inputs.renkubot-kubeconfig }}
+        HELM_RELEASE_REGEX: "^${{ inputs.renku-release }}$"
+        MAX_AGE_SECONDS: "0"
+        GITLAB_TOKEN: ${{ inputs.gitlab-token }}
+        DELETE_NAMESPACE: "false"

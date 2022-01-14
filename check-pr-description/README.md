@@ -31,6 +31,7 @@ The reference will be stored in an output variable with the same name. For examp
 ```
 
 will deploy the tag `0.11.9` of `renku-ui` and the tip of the `master` branch of `renku`.
+
 ### Passing in additional values
 
 You may pass in additional ad-hoc values to the deployment by using the `extra-values` option.
@@ -50,6 +51,19 @@ for example
 
 ```
 /deploy renku-ui=0.11.9 #notest
+```
+
+### Persisting a deployment after the tests are complete
+
+The `#persist` string will set the `persist` flag to `true` which is `false` by default.
+The `persist` parameter in the action output can then be used to signal to the `test-renku`
+action that the Renku deployment should not be deleted (i.e. it should perisist) after the
+tests complete. 
+
+For example:
+
+```
+/deploy renku-ui=0.11.9 #persist
 ```
 
 ## Procedures for renku platform PRs
