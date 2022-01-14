@@ -14,8 +14,6 @@ of a line in the PR description.
 A renku component name followed by `=<ref>`, where `<ref>` is any valid
 reference like a tag or a branch name (E.G. `renku-ui=0.11.9` or
 `renku-notebooks=debug-with-vscode-k8s`).
-- The string `#notest`.
-- The string `#persist`.
 
 The supported components are:
 - `renku`
@@ -33,12 +31,6 @@ The reference will be stored in an output variable with the same name. For examp
 ```
 
 will deploy the tag `0.11.9` of `renku-ui` and the tip of the `master` branch of `renku`.
-
-Keep in mind that:
-- Unknown sections are skipped.
-- The order plays no role unless you define multiple references for the same
-  component. In that case, only the first is considered. It would be best if you
-  tried to avoid any repetition.
 
 ### Passing in additional values
 
