@@ -14,6 +14,7 @@ A section is made by one of the following:
   like a tag or a branch name (E.G. `renku-ui=0.11.9` or
   `renku-notebooks=debug-with-vscode-k8s`).
 - The string `#notest`.
+- The string `#persist`
 
 The supported components are:
 - `renku`
@@ -27,6 +28,11 @@ The supported components are:
 The reference will be stored in an output variable with the same name.
 
 The `#notest` string will falsify the otherwise truthy variable named `test-enabled`.
+
+The `#persist` string will set the `persist` flag to `true` which is `false` by default.
+The `persist` parameter in the action output can then be used to signal to the `test-renku`
+action that the Renku deployment should not be deleted (i.e. it should perisist) after the
+tests complete.
 
 Keep in mind that:
 - Unknown sections are skipped.
@@ -42,7 +48,7 @@ repository to simplify deploying a testing environment for pull requests.
 The string should look like the following:
 
 ```
-/deploy #notest renku-ui=0.11.9
+/deploy #notest #persist renku-ui=0.11.9
 ```
 
 Further information can be found here:
