@@ -28,14 +28,11 @@ deploy-pr:
       DOCKER_USERNAME: ${{ secrets.RENKU_DOCKER_USERNAME }}
       GITLAB_TOKEN: ${{ secrets.DEV_GITLAB_TOKEN }}
       KUBECONFIG: "${{ github.workspace }}/renkubot-kube.config"
-      RANCHER_PROJECT_ID: ${{ secrets.CI_RANCHER_PROJECT }}
       RENKU_ANONYMOUS_SESSIONS: true
       RENKU_RELEASE: ci-renku-${{ github.event.number }}
       RENKU_VALUES_FILE: "${{ github.workspace }}/values.yaml"
       RENKU_VALUES: ${{ secrets.CI_RENKU_VALUES }}
       RENKUBOT_KUBECONFIG: ${{ secrets.RENKUBOT_DEV_KUBECONFIG }}
-      RENKUBOT_RANCHER_BEARER_TOKEN: ${{ secrets.RENKUBOT_RANCHER_BEARER_TOKEN }}
-      RANCHER_DEV_API_ENDPOINT: ${{ secrets.RANCHER_DEV_API_ENDPOINT }}
       TEST_ARTIFACTS_PATH: "tests-artifacts-${{ github.sha }}"
       renku: "@${{ github.head_ref }}"
       renku_core: "${{ needs.check-deploy.outputs.renku-core }}"
