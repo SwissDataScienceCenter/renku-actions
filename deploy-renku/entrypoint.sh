@@ -26,16 +26,8 @@ if test -n "$GITLAB_TOKEN" ; then
   yq w -i $RENKU_VALUES_FILE "gateway.gitlabClientSecret" "$APP_SECRET"
 fi
 
-NAMESPACE_EXISTS=$( curl -s -H "Authorization: Bearer $RENKUBOT_RANCHER_BEARER_TOKEN" \
-      -X GET \
-      "${RANCHER_DEV_API_ENDPOINT}/namespaces?projectId=${RANCHER_PROJECT_ID}" | grep $RENKU_NAMESPACE)
-if test -z "$NAMESPACE_EXISTS" ; then
-  curl -s -H "Authorization: Bearer $RENKUBOT_RANCHER_BEARER_TOKEN" \
-      -X POST \
-      -d "name=${RENKU_NAMESPACE}" \
-      -d "projectId=${RANCHER_PROJECT_ID}" \
-      "${RANCHER_DEV_API_ENDPOINT}/namespaces"
-fi
+# create namespace and ignore error in case it already exists
+kubectl create namespace ${RENKU_NAMESPACE} || true
 
 # deploy renku - reads config from environment variables
 helm repo add renku https://swissdatasciencecenter.github.io/helm-charts
