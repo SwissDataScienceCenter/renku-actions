@@ -35,6 +35,9 @@ class RenkuRequirement(object):
             # this is a git ref
             self.is_git_ref = True
 
+    def __repr__(self):
+        return f"RenkuRequirement({self.component}, {self.version}, {self.tempdir})"
+
     @property
     def ref(self):
         if self.is_git_ref:
@@ -79,6 +82,7 @@ class RenkuRequirement(object):
     def clone(self):
         """Clone repo and reset to ref."""
         if not self.repo_dir.exists():
+            print(f"[script run] git clone {self.repo_url} {self.repo_dir}")
             check_call(
                 [
                     "git",
@@ -87,6 +91,7 @@ class RenkuRequirement(object):
                     self.repo_dir,
                 ]
             )
+        print(f"[script run] git checkout {self.ref}")
         check_call(["git", "checkout", self.ref], cwd=self.repo_dir)
 
     def chartpress(self, skip_build=False):
@@ -165,6 +170,7 @@ if __name__ == "__main__":
 
     ## 1. clone the renku repo
     renku_req = RenkuRequirement(component="renku", version=args.renku or "@master", tempdir=tempdir)
+    print(f"Processing requirement {renku_req}")
     renku_req.clone()
 
     with open(reqs_path) as f:
