@@ -42,7 +42,9 @@ For example:
 ```
 
 Note that you can pass in multiple values, but they must be in the same string,
-separated by a comma and without whitespaces.
+separated by a comma and without whitespaces. Check out [the helm docs](https://helm.sh/docs/intro/using_helm/#the-format-and-limitations-of---set)
+for information on how to provide more complex values - such as an entire array - through
+the `extra-values` option.
 
 ### Skipping tests
 
