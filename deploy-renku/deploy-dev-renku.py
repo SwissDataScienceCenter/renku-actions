@@ -164,7 +164,9 @@ if __name__ == "__main__":
     reqs_path = renku_dir / "helm-chart/renku/requirements.yaml"
 
     ## 1. clone the renku repo
-    renku_req = RenkuRequirement(component="renku", version=args.renku or "@master", tempdir=tempdir)
+    renku_version = args.renku or "@master"
+    print(f"Cloning Renku version {renku_version} in {tempdir}")
+    renku_req = RenkuRequirement(component="renku", version=renku_version, tempdir=tempdir)
     renku_req.clone()
 
     with open(reqs_path) as f:
