@@ -38,11 +38,13 @@ You may pass in additional ad-hoc values to the deployment by using the `extra-v
 For example:
 
 ```
-/deploy extra-values="tests.image.tag=my-test,core.sentry.env=feature"
+/deploy extra-values=tests.image.tag=my-test,core.sentry.env=feature
 ```
 
 Note that you can pass in multiple values, but they must be in the same string,
-separated by a comma and without whitespaces.
+separated by a comma and without whitespaces. Check out [the helm docs](https://helm.sh/docs/intro/using_helm/#the-format-and-limitations-of---set)
+for information on how to provide more complex values - such as an entire array - through
+the `extra-values` option.
 
 ### Skipping tests
 
