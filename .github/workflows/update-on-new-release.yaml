@@ -20,7 +20,7 @@ jobs:
           - name: SwissDataScienceCenter/renku-gateway
             ref: master
           - name: SwissDataScienceCenter/renku-graph
-            ref: master
+            ref: development
     runs-on: ubuntu-latest
     steps:
     - name: Get release tag
@@ -32,7 +32,7 @@ jobs:
         ref: ${{ matrix.repo.ref }}
         fetch-depth: 1
     - name: Update actions version
-      uses: SwissDataScienceCenter/renku-actions/update-renku-actions@v0.4.0
+      uses: SwissDataScienceCenter/renku-actions/update-renku-actions@master
     - name: Submit PR
       uses: peter-evans/create-pull-request@v3
       with:
