@@ -44,11 +44,8 @@ do
             then
                 # remove any jupyterservers - they have finalizers that prevent the namespces to be deleted
                 SERVERS=$(kubectl -n $NAMESPACE get jupyterservers -o json | jq -r '.items | .[].metadata.name') 
-                for SERVER in $SERVERS
-                do
-                    echo "Deleting jupyterserver $SERVER in namespace $NAMESPACE."
-                    kubectl -n $NAMESPACE delete --wait --cascade="foreground" jupyterserver $SERVER
-                done
+                echo "Deleting jupyterserver $SERVERS in namespace $NAMESPACE."
+                kubectl -n $NAMESPACE delete --all --wait --cascade="foreground" jupyterserver
                 # remove the gitlab app
                 APPS=$(curl -s ${GITLAB_URL}/api/v4/applications -H "private-token: ${GITLAB_TOKEN}" | jq -r ".[] | select(.application_name == \"${RELEASE}\") | .id")
                 for APP in $APPS
