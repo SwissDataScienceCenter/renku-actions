@@ -47,7 +47,7 @@ do
                 for SERVER in $SERVERS
                 do
                     echo "Deleting jupyterserver $SERVER in namespace $NAMESPACE."
-                    kubectl -n $NAMESPACE delete --wait --cascade="foreground" jupyterserver
+                    kubectl -n $NAMESPACE delete --wait --cascade="foreground" jupyterserver $SERVER
                 done
                 # remove the gitlab app
                 APPS=$(curl -s ${GITLAB_URL}/api/v4/applications -H "private-token: ${GITLAB_TOKEN}" | jq -r ".[] | select(.application_name == \"${RELEASE}\") | .id")
