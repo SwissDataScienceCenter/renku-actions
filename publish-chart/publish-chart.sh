@@ -40,6 +40,7 @@ fi
 # set up git
 git config --global user.email "$GIT_EMAIL"
 git config --global user.name "$GIT_USER"
+git config --global --add safe.directory /github/workspace
 
 helm dep update $CHART_DIR/$CHART_NAME
 
