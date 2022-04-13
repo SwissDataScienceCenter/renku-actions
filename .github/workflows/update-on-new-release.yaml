@@ -20,19 +20,24 @@ jobs:
           - name: SwissDataScienceCenter/renku-gateway
             ref: master
           - name: SwissDataScienceCenter/renku-graph
-            ref: master
+            ref: development
     runs-on: ubuntu-latest
     steps:
     - name: Get release tag
       run: echo "NEW_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-    - name: Checkout code
+    - name: Checkout repo to be updated
       uses: actions/checkout@v2
       with:
         repository: ${{ matrix.repo.name }}
         ref: ${{ matrix.repo.ref }}
         fetch-depth: 1
+    - name: Checkout renku-actions repo
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+        path: .actions-repo
     - name: Update actions version
-      uses: SwissDataScienceCenter/renku-actions/update-renku-actions@v0.4.0
+      uses: ./.actions-repo/update-renku-actions
     - name: Submit PR
       uses: peter-evans/create-pull-request@v3
       with:
