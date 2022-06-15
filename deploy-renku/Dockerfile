@@ -1,4 +1,4 @@
-FROM alpine/k8s:1.16.8
+FROM alpine/k8s:1.21.12
 
 # install dependencies
 RUN apk add python3 docker jq && \
