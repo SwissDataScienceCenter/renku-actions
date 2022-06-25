@@ -17,7 +17,7 @@ inputs:
   test-timeout-mins:
     description: "The timeout in mins to wait for the helm tests to complete."
     required: false
-    default: "60"
+    default: "80"
   ci-renku-values:
     description: "The helm values file contents used to deploy renku, used here only to extract the S3 bucket credentials."
     required: true
