@@ -1,7 +1,7 @@
 name: "test-renku"
 description: "Run the acceptance tests for a Renku CI deployment"
 inputs:
-  renkubot-kubeconfig:
+  kubeconfig:
     description: "The contents of the kubeconfig file to be used for helm/kubectl commands."
     required: true
   renku-release:
@@ -9,18 +9,32 @@ inputs:
     required: true
   gitlab-token:
     description: "A gitlab token used for the cleanup of application in Gitlab."
-    required: true  
+    required: true
   persist:
     description: "Whether the CI deployment should be kept after the tests finish or not."
     required: false
     default: "false"
+  s3-results-host:
+    default: os.zhdk.cloud.switch.ch
+    description: S3 host where the tests artifacts have been stored
+    required: true
+  s3-results-bucket:
+    default: dev-acceptance-tests-results
+    description: Name of the S3 bucket where the tests artifacts have been stored
+    required: true
+  s3-results-access-key:
+    description: Access key to the S3 bucket where the tests artifacts have been stored
+    required: true
+  s3-results-secret-key:
+    description: Secret key to the S3 bucket where the tests artifacts have been stored
+    required: true
+  s3-results-artifacts-path:
+    description: Path within the S3 bucket where the tests artifacts have been stored
+    required: true
   test-timeout-mins:
     description: "The timeout in mins to wait for the helm tests to complete."
     required: false
     default: "60"
-  ci-renku-values:
-    description: "The helm values file contents used to deploy renku, used here only to extract the S3 bucket credentials."
-    required: true
 runs:
   using: "composite"
   steps:
@@ -32,15 +46,18 @@ runs:
       run: ${{ github.action_path }}/entrypoint.sh
       shell: bash
       env:
-        RENKUBOT_KUBECONFIG: ${{ inputs.renkubot-kubeconfig }}
+        RENKUBOT_KUBECONFIG: ${{ inputs.kubeconfig }}
         RENKU_RELEASE: ${{ inputs.renku-release }}
         TEST_TIMEOUT_MINS: ${{ inputs.test-timeout-mins }}
     - name: Download artifact for packaging on failure
       if: failure()
-      uses: SwissDataScienceCenter/renku-actions/download-test-artifacts@v0.4.1
-      env:
-        RENKU_VALUES: ${{ inputs.ci-renku-values }}
-        TEST_ARTIFACTS_PATH: "tests-artifacts-${{ github.sha }}"
+      uses: SwissDataScienceCenter/renku-actions/download-test-artifacts@1.0.0
+      with:
+        s3-results-host: ${{ inputs.s3-results-host }}
+        s3-results-bucket: ${{ inputs.s3-results-bucket }}
+        s3-results-access-key: ${{ inputs.s3-results-access-key }}
+        s3-results-secret-key: ${{ inputs.s3-results-secret-key }}
+        s3-results-artifacts-path: "tests-artifacts-${{ github.sha }}"
     - name: Upload screenshots on failure
       if: failure()
       uses: actions/upload-artifact@v1
@@ -48,10 +65,10 @@ runs:
         name: acceptance-test-artifacts
         path: ${{ github.workspace }}/test-artifacts/
     - name: "Cleanup CI deployment after test if persist flag set to false"
-      uses: SwissDataScienceCenter/renku-actions/cleanup-renku-ci-deployments@v0.4.1
+      uses: SwissDataScienceCenter/renku-actions/cleanup-renku-ci-deployments@1.0.0
       if: ${{ always() && inputs.persist == 'false' }}
       env:
-        RENKUBOT_KUBECONFIG: ${{ inputs.renkubot-kubeconfig }}
+        RENKUBOT_KUBECONFIG: ${{ inputs.kubeconfig }}
         HELM_RELEASE_REGEX: "^${{ inputs.renku-release }}$"
         MAX_AGE_SECONDS: "0"
         GITLAB_TOKEN: ${{ inputs.gitlab-token }}
