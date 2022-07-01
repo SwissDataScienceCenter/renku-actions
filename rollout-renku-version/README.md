@@ -1,7 +1,6 @@
 # Action for updating component version
 
-This is a docker action that will update the version of a dependency in the main
-Renku chart.
+This is a docker action that will update the Renku version (rollout) in the deployments managed by terraform.
 
 ## Sample usage
 
@@ -12,7 +11,7 @@ It can simply be used as a step in a GitHub actions job:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - uses: SwissDataScienceCenter/renku/actions/update-component-version@master
+    - uses: SwissDataScienceCenter/renku/actions/rollout-renku-deployment@master
       env:
         GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
 ```
@@ -25,7 +24,7 @@ You can set these environment variables:
 
 | Variable name | Default |
 | --------------| --------|
-| CHART_NAME    | name of the repository |
-| UPSTREAM_REPO | SwissDataScienceCenter/renku |
+| CHART_NAME    | renku   |
+| UPSTREAM_REPO | SwissDataScienceCenter/terraform-renku |
 | GIT_EMAIL     | renku@datascience.ch |
 | GIT_USER      | Renku Bot |
