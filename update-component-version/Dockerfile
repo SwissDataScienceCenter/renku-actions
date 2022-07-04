@@ -9,5 +9,4 @@ RUN apk add --no-cache git bash && \
     apk del .build-deps
 
 COPY update-upstream.sh /
-RUN CHMOD +x /update-upstream.sh
 ENTRYPOINT [ "/update-upstream.sh" ]

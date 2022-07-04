@@ -8,4 +8,5 @@ RUN apk add --no-cache git bash && \
     apk del .build-deps
 
 COPY rollout-renku-deployment.sh /
+RUN CHMOD +x /rollout-renku-deployment.sh
 ENTRYPOINT [ "/rollout-renku-deployment.sh" ]
