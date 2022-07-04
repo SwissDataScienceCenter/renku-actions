@@ -19,8 +19,8 @@ GIT_EMAIL=${GIT_EMAIL:=renku@datascience.ch}
 GIT_USER=${GIT_USER:="Renku Bot"}
 CHART_NAME=${CHART_NAME:=$(echo $GITHUB_REPOSITORY | cut -d/ -f2)}
 
-# build this chart to get the version
-chartpress --skip-build $CHART_TAG
+# get the chart version
+
 CHART_VERSION=$(yq r helm-chart/${CHART_NAME}/Chart.yaml version)
 
 git clone --depth=1 --branch=${UPSTREAM_BRANCH} https://${GITHUB_TOKEN}@github.com/${UPSTREAM_REPO} upstream-repo
