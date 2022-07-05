@@ -35,9 +35,12 @@ clusters=$(ls -d ${PRODUCTION_DIR}/*)
 
 for cluster in $clusters
 do
-  yq w -i $cluster/main/charts/renku.yaml "spec.chart.spec.version" $CHART_VERSION
-  sed -i "/Renku version/c\          ### Renku version $CHART_VERSION ($date)" $cluster/main/charts/renku.yaml
-  sed -i "/Release Notes/c\          See the [Release Notes](https://github.com/${GITHUB_REPOSITORY}/releases/tag/$CHART_VERSION)" $cluster/main/charts/renku.yaml
+  if [[ ! $cluster =~ "rancher" && ! $cluster =~ "renku-dev" ]];
+  then
+    yq w -i $cluster/main/charts/renku.yaml "spec.chart.spec.version" $CHART_VERSION
+    sed -i "/Renku version/c\          ### Renku version $CHART_VERSION ($date)" $cluster/main/charts/renku.yaml
+    sed -i "/Release Notes/c\          See the [Release Notes](https://github.com/${GITHUB_REPOSITORY}/releases/tag/$CHART_VERSION)" $cluster/main/charts/renku.yaml
+  fi
 done
 
 
