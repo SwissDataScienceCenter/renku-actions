@@ -19,7 +19,7 @@ from subprocess import check_call
 
 import yaml
 
-components = ["renku-core", "renku-gateway", "renku-graph", "renku-notebooks", "renku-ui", "renku-ui-server"]
+components = ["renku-core", "renku-gateway", "renku-graph", "renku-notebooks", "renku-ui"]
 
 
 class RenkuRequirement(object):
@@ -57,13 +57,11 @@ class RenkuRequirement(object):
             return f"file://{self.tempdir}/{self.repo}/helm-chart/{self.component}"
         return "https://swissdatasciencecenter.github.io/helm-charts/"
 
-    # handle the special case of renku-python and renku-ui-server
+    # handle the special case of renku-python
     @property
     def repo(self):
         if self.component == "renku-core":
             return "renku-python"
-        if self.component == "renku-ui-server":
-            return "renku-ui"
         return self.component
 
     @property
@@ -171,10 +169,6 @@ if __name__ == "__main__":
         reqs = yaml.load(f, Loader=yaml.SafeLoader)
 
     ## 2. set the chosen versions in the requirements.yaml file
-
-    # keep renku-ui-server version aligned with renku-ui
-    if component_versions["renku_ui"] and not component_versions["renku_ui_server"]:
-        component_versions["renku_ui_server"] = component_versions["renku_ui"]
 
     reqs = configure_requirements(tempdir, reqs, component_versions)
 
