@@ -27,14 +27,17 @@ git config --global user.name "$GIT_USER"
 # update renku version and push
 git checkout -b auto-update/${CHART_NAME}-${CHART_VERSION} ${UPSTREAM_BRANCH}
 
-# use current date
-date=$( date +"%B %dth %Y")
+PRODUCTION_DIR="gitops/production"
 
-for cluster in hslu limited renkovid renkulab unifr
+# use current date
+date=$(date +"%B %dth %Y")
+clusters=$(ls -d ${PRODUCTION_DIR}/*)
+
+for cluster in $clusters
 do
-  yq w -i gitops/production/$cluster/main/charts/renku.yaml "spec.chart.spec.version" $CHART_VERSION
-  sed -i "/Renku version/c\          ### Renku version $CHART_VERSION ($date)" gitops/production/$cluster/main/charts/renku.yaml
-  sed -i "/Release Notes/c\          See the [Release Notes](https://github.com/${UPSTREAM_REPO}/releases/tag/$CHART_VERSION)" gitops/production/$cluster/main/charts/renku.yaml
+  yq w -i $cluster/main/charts/renku.yaml "spec.chart.spec.version" $CHART_VERSION
+  sed -i "/Renku version/c\          ### Renku version $CHART_VERSION ($date)" $cluster/main/charts/renku.yaml
+  sed -i "/Release Notes/c\          See the [Release Notes](https://github.com/${GITHUB_REPOSITORY}/releases/tag/$CHART_VERSION)" $cluster/main/charts/renku.yaml
 done
 
 
