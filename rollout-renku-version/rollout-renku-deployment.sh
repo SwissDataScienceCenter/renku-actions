@@ -13,6 +13,9 @@ UPSTREAM_BRANCH=${UPSTREAM_BRANCH:=main}
 GIT_EMAIL=${GIT_EMAIL:=renku@datascience.ch}
 GIT_USER=${GIT_USER:="Renku Bot"}
 CHART_NAME=${CHART_NAME:=$(echo $GITHUB_REPOSITORY | cut -d/ -f2)}
+PRODUCTION_DIR=${PRODUCTION_DIR:="gitops/production"}
+DEV_DIR=${DEV_DIR:="renku-dev"}
+RANCHER_DIR=${RANCHER_DIR:="rancher"}
 
 # get the chart version
 CHART_VERSION=$(yq r helm-chart/${CHART_NAME}/Chart.yaml version)
@@ -27,7 +30,6 @@ git config --global user.name "$GIT_USER"
 # update renku version and push
 git checkout -b auto-update/${CHART_NAME}-${CHART_VERSION} ${UPSTREAM_BRANCH}
 
-PRODUCTION_DIR="gitops/production"
 
 # use current date
 date=$(date +"%B %dth %Y")
@@ -35,7 +37,7 @@ clusters=$(ls -d ${PRODUCTION_DIR}/*)
 
 for cluster in $clusters
 do
-  if [[ ! $cluster =~ "rancher" && ! $cluster =~ "renku-dev" ]];
+  if [[ ! $cluster =~ $RANCHER_DIR && ! $cluster =~ $DEV_DIR ]];
   then
     yq w -i $cluster/main/charts/renku.yaml "spec.chart.spec.version" $CHART_VERSION
     sed -i "/Renku version/c\          ### Renku version $CHART_VERSION ($date)" $cluster/main/charts/renku.yaml
