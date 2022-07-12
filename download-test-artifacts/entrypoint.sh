@@ -1,9 +1,9 @@
 #!/bin/sh -e
-printf "%s" "$RENKU_VALUES" > values.yaml
-export S3_HOST=$(yq '.tests.resultsS3.host' values.yaml -r)
-export S3_ACCESS=$(yq '.tests.resultsS3.accessKey' values.yaml -r)
-export S3_SECRET=$(yq '.tests.resultsS3.secretKey' values.yaml -r)
-export S3_BUCKET=$(yq '.tests.resultsS3.bucket' values.yaml -r)
+export S3_HOST=$1
+export S3_BUCKET=$2
+export S3_ACCESS=$3
+export S3_SECRET=$4
+export TEST_ARTIFACTS_PATH=$5
 export MC_HOST_bucket="https://${S3_ACCESS}:${S3_SECRET}@${S3_HOST}"
 mkdir -p $GITHUB_WORKSPACE/test-artifacts
 echo "Copying files from bucket/$S3_BUCKET/$TEST_ARTIFACTS_PATH/ to CI job at $GITHUB_WORKSPACE/test-artifacts/"

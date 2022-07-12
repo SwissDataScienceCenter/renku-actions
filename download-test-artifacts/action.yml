@@ -1,8 +1,32 @@
-name: 'download-tests-artifacts'
-description: 'Download tests artifacts'
+name: "download-tests-artifacts"
+description: "Download tests artifacts"
+inputs:
+  s3-results-host:
+    default: os.zhdk.cloud.switch.ch
+    description: S3 host where the tests artifacts have been stored
+    required: true
+  s3-results-bucket:
+    default: dev-acceptance-tests-results
+    description: Name of the S3 bucket where the tests artifacts have been stored
+    required: true
+  s3-results-access-key:
+    description: Access key to the S3 bucket where the tests artifacts have been stored
+    required: true
+  s3-results-secret-key:
+    description: Secret key to the S3 bucket where the tests artifacts have been stored
+    required: true
+  s3-results-artifacts-path:
+    description: Path within the S3 bucket where the tests artifacts have been stored
+    required: true
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: "docker"
+  image: "Dockerfile"
+  args:
+    - ${{ inputs.s3-results-host }}
+    - ${{ inputs.s3-results-bucket }}
+    - ${{ inputs.s3-results-access-key }}
+    - ${{ inputs.s3-results-secret-key }}
+    - ${{ inputs.s3-results-artifacts-path }}
 branding:
-  icon: 'activity'
-  color: 'blue'
+  icon: "activity"
+  color: "blue"
