@@ -51,7 +51,7 @@ runs:
         TEST_TIMEOUT_MINS: ${{ inputs.test-timeout-mins }}
     - name: Download artifact for packaging on failure
       if: failure()
-      uses: SwissDataScienceCenter/renku-actions/download-test-artifacts@1.0.0
+      uses: SwissDataScienceCenter/renku-actions/download-test-artifacts@v1.0.0
       with:
         s3-results-host: ${{ inputs.s3-results-host }}
         s3-results-bucket: ${{ inputs.s3-results-bucket }}
@@ -65,7 +65,7 @@ runs:
         name: acceptance-test-artifacts
         path: ${{ github.workspace }}/test-artifacts/
     - name: "Cleanup CI deployment after test if persist flag set to false"
-      uses: SwissDataScienceCenter/renku-actions/cleanup-renku-ci-deployments@1.0.0
+      uses: SwissDataScienceCenter/renku-actions/cleanup-renku-ci-deployments@v1.0.0
       if: ${{ always() && inputs.persist == 'false' }}
       env:
         RENKUBOT_KUBECONFIG: ${{ inputs.kubeconfig }}
