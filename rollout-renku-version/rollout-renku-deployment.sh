@@ -30,11 +30,11 @@ cluster_dirs=$(ls -d ${PRODUCTION_DIR}/*)
 for cluster_dir in $cluster_dirs
 do
   cluster=$(echo "$cluster_dir" | awk -F "/" '{print $3}')
-  if [[ ! $exlude_clusters =~ "$cluster" ]];
+  if [[ ! $EXCLUDE_CLUSTERS =~ "$cluster" ]];
   then
     git clone --depth=1 --branch=${UPSTREAM_BRANCH} https://${GITHUB_TOKEN}@github.com/${UPSTREAM_REPO} deployment-repo
     cd deployment-repo
-    
+
     # update renku version and push
     git checkout -b auto-update/${CHART_NAME}-${CHART_VERSION}-${cluster} ${UPSTREAM_BRANCH}
 
