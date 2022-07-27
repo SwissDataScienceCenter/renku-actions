@@ -25,7 +25,13 @@ git config --global user.name "$GIT_USER"
 
 # use current date
 date=$(date +"%B %dth %Y")
+
+# get the list of clusters to update
+git clone --depth=1 --branch=${UPSTREAM_BRANCH} https://${GITHUB_TOKEN}@github.com/${UPSTREAM_REPO} deployment-repo
+cd deployment-repo
 cluster_dirs=$(ls -d ${PRODUCTION_DIR}/*)
+cd ..
+rm -rf deployment-repo
 
 for cluster_dir in $cluster_dirs
 do
