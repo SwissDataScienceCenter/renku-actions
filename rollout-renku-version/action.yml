@@ -1,0 +1,8 @@
+name: 'Renku update'
+description: 'Update Renku version in a terraform managed Renku deployment.'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+branding:
+  icon: 'activity'
+  color: 'blue'
