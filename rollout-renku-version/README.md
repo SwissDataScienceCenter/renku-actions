@@ -22,13 +22,12 @@ Note that the `CI_TOKEN` needs write permissions to your upstream repository.
 
 You can set these environment variables:
 
-| Variable name   | Default |
-| ----------------| --------|
-| CHART_NAME      | renku   |
-| GIT_EMAIL       | renku@datascience.ch |
-| GIT_USER        | Renku Bot |
-| UPSTREAM_REPO   | SwissDataScienceCenter/terraform-renku |
-| UPSTREAM_BRANCH | main |
-| PRODUCTION_DIR  | gitops/production |
-| DEV_DIR         | renku-dev |
-| RANCHER_DIR     | rancher |
+| Variable name    | Default |
+| ---------------- | --------|
+| CHART_NAME       | renku   |
+| GIT_EMAIL        | renku@datascience.ch |
+| GIT_USER         | Renku Bot |
+| UPSTREAM_REPO    | SwissDataScienceCenter/terraform-renku |
+| UPSTREAM_BRANCH  | main |
+| PRODUCTION_DIR   | gitops/production |
+| EXCLUDE_CLUSTERS | rancher renku-dev |
