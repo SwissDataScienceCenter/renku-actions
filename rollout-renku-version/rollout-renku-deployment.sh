@@ -24,7 +24,7 @@ git config --global user.email "$GIT_EMAIL"
 git config --global user.name "$GIT_USER"
 
 # use current date
-date=$(date +"%B %dth %Y")
+DATE=$(date +"%B %dth %Y")
 
 # get the list of clusters to update
 git clone --depth=1 --branch=${UPSTREAM_BRANCH} https://${GITHUB_TOKEN}@github.com/${UPSTREAM_REPO} deployment-repo
@@ -45,7 +45,7 @@ do
     git checkout -b auto-update/${CHART_NAME}-${CHART_VERSION}-${cluster} ${UPSTREAM_BRANCH}
 
     yq w -i $cluster_dir/main/charts/renku.yaml "spec.chart.spec.version" $CHART_VERSION
-    sed -i "/Renku version/c\            ### Renku version $CHART_VERSION ($date)" $cluster_dir/main/charts/renku.yaml
+    sed -i "/Renku version/c\            ### Renku version $CHART_VERSION ($DATE)" $cluster_dir/main/charts/renku.yaml
     sed -i "/Release Notes/c\            See the [Release Notes](https://github.com/${GITHUB_REPOSITORY}/releases/tag/$CHART_VERSION)" $cluster_dir/main/charts/renku.yaml
 
     git add .
