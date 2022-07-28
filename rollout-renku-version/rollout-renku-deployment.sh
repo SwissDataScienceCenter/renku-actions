@@ -45,8 +45,8 @@ do
     git checkout -b auto-update/${CHART_NAME}-${CHART_VERSION}-${cluster} ${UPSTREAM_BRANCH}
 
     yq w -i $cluster_dir/main/charts/renku.yaml "spec.chart.spec.version" $CHART_VERSION
-    sed -i "/Renku version/c\          ### Renku version $CHART_VERSION ($date)" $cluster_dir/main/charts/renku.yaml
-    sed -i "/Release Notes/c\          See the [Release Notes](https://github.com/${GITHUB_REPOSITORY}/releases/tag/$CHART_VERSION)" $cluster_dir/main/charts/renku.yaml
+    sed -i "/Renku version/c\            ### Renku version $CHART_VERSION ($date)" $cluster_dir/main/charts/renku.yaml
+    sed -i "/Release Notes/c\            See the [Release Notes](https://github.com/${GITHUB_REPOSITORY}/releases/tag/$CHART_VERSION)" $cluster_dir/main/charts/renku.yaml
 
     git add .
     git commit -m "chore: updating ${CHART_NAME} version to ${CHART_VERSION}"
