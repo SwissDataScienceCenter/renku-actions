@@ -14,7 +14,7 @@ jobs:
           - name: SwissDataScienceCenter/renku-notebooks
             ref: master
           - name: SwissDataScienceCenter/renku-python
-            ref: master
+            ref: develop
           - name: SwissDataScienceCenter/renku-ui
             ref: master
           - name: SwissDataScienceCenter/renku-gateway
@@ -38,6 +38,8 @@ jobs:
         path: .actions-repo
     - name: Update actions version
       uses: ./.actions-repo/update-renku-actions
+    - name: Remove renku-actions repo
+      run: rm -rf ./.actions-repo
     - name: Submit PR
       uses: peter-evans/create-pull-request@v3
       with:
