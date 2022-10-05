@@ -3,7 +3,7 @@ FROM python:3.7-alpine3.10
 # install dependencies
 RUN apk add --no-cache git bash && \
     apk add --no-cache --virtual .build-deps gcc g++ make && \
-    wget -O /usr/bin/yq "https://github.com/mikefarah/yq/releases/download/3.1.1/yq_linux_amd64" && \
+    wget -O /usr/bin/yq "https://github.com/mikefarah/yq/releases/download/v4.27.5/yq_linux_amd64" && \
     chmod a+x /usr/bin/yq && \
     apk del .build-deps
 
