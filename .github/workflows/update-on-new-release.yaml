@@ -13,8 +13,6 @@ jobs:
             ref: master
           - name: SwissDataScienceCenter/renku-notebooks
             ref: master
-          - name: SwissDataScienceCenter/renku-python
-            ref: develop
           - name: SwissDataScienceCenter/renku-ui
             ref: master
           - name: SwissDataScienceCenter/renku-gateway
