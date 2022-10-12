@@ -17,7 +17,7 @@ PRODUCTION_DIR=${PRODUCTION_DIR:="gitops/production"}
 EXCLUDE_CLUSTERS=${EXCLUDE_CLUSTERS:="rancher renku-dev"}
 
 # get the chart version
-CHART_VERSION=$(yq r helm-chart/${CHART_NAME}/Chart.yaml version)
+CHART_VERSION=$(yq eval '.version' helm-chart/${CHART_NAME}/Chart.yaml)
 
 # set up git
 git config --global user.email "$GIT_EMAIL"
