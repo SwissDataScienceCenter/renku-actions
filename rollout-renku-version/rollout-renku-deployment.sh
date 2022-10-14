@@ -7,6 +7,12 @@ then
   exit 1
 fi
 
+if [ -z "$CHART_VERSION" ]
+then
+  echo "Must specify CHART_VERSION"
+  exit 1
+fi
+
 # set up environment variables
 UPSTREAM_REPO=${UPSTREAM_REPO:=SwissDataScienceCenter/terraform-renku}
 UPSTREAM_BRANCH=${UPSTREAM_BRANCH:=main}
@@ -15,9 +21,6 @@ GIT_USER=${GIT_USER:="Renku Bot"}
 CHART_NAME=${CHART_NAME:=$(echo $GITHUB_REPOSITORY | cut -d/ -f2)}
 PRODUCTION_DIR=${PRODUCTION_DIR:="gitops/production"}
 EXCLUDE_CLUSTERS=${EXCLUDE_CLUSTERS:="rancher renku-dev"}
-
-# get the chart version
-CHART_VERSION=$(yq eval '.version' helm-chart/${CHART_NAME}/Chart.yaml)
 
 # set up git
 git config --global user.email "$GIT_EMAIL"
