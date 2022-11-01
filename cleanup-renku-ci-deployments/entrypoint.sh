@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 if test -z "$RENKUBOT_KUBECONFIG" ; then
     echo 'Please specify a kubeconfig that can be used for the helm and kubectl commands.'
@@ -15,13 +16,14 @@ HELM_CI_RELEASE_REGEX=".+-ci-.+|^ci-.+"
 HELM_RELEASE_REGEX="${HELM_RELEASE_REGEX:=".*"}"
 K8S_CI_NAMESPACE_REGEX=".+-ci-.+|^ci-.+"
 MAX_AGE_SECONDS=${MAX_AGE_SECONDS:=604800}
-GITLAB_URL="https://dev.renku.ch/gitlab"
+GITLAB_URL="https://gitlab.dev.renku.ch"
 DELETE_NAMESPACE=${DELETE_NAMESPACE:="false"}
 
 echo "$RENKUBOT_KUBECONFIG" > "$KUBECONFIG" && chmod 400 "$KUBECONFIG"
 echo "Kubeconfig is at $KUBECONFIG."
 KUBECONFIG_LINES=$(wc -l $KUBECONFIG)
 echo "Kubeconfig is $KUBECONFIG_LINES long."
+echo "GitLab URL is $GITLAB_URL"
 echo "Looking for CI releases with regex $HELM_RELEASE_REGEX."
 echo "Looking in namespaces with regex $K8S_CI_NAMESPACE_REGEX."
 echo "Age threshold for deletion is $MAX_AGE_SECONDS seconds."
