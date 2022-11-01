@@ -1,6 +1,10 @@
 #!/bin/sh
+set -e
 
 RENKU_NAMESPACE=${RENKU_NAMESPACE:-$RENKU_RELEASE}
+
+# set GitLab URL
+GITLAB_URL="https://gitlab.dev.renku.ch"
 
 # set up docker credentials
 echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
@@ -13,7 +17,7 @@ printf "%s" "$RENKU_VALUES" | sed "s/<replace>/${RENKU_RELEASE}/" > $RENKU_VALUE
 
 # register the GitLab app
 if test -n "$GITLAB_TOKEN" ; then
-  gitlab_app=$(curl -s -X POST https://dev.renku.ch/gitlab/api/v4/applications \
+  gitlab_app=$(curl -s -X POST ${GITLAB_URL}/api/v4/applications \
                         -H "private-token: $GITLAB_TOKEN" \
                         --data "name=${RENKU_RELEASE}" \
                         --data "redirect_uri=https://${RENKU_RELEASE}.dev.renku.ch/auth/realms/Renku/broker/dev-renku/endpoint https://${RENKU_RELEASE}.dev.renku.ch/api/auth/gitlab/token" \
