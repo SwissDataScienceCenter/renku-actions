@@ -46,7 +46,7 @@ runs:
         echo "Target PR: https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ inputs.pr_ref }}"
         pr_text=$(curl -s https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ inputs.pr_ref }} | jq '.body')
         pr_contains_string=$(echo $pr_text | jq 'test("${{ inputs.string }}")')
-        echo "::set-output name=pr-contains-string::$pr_contains_string"
+        echo "pr-contains-string=$pr_contains_string" >> $GITHUB_OUTPUT
         echo "String found: $pr_contains_string"
         test_enabled=true
         persist=false
@@ -57,32 +57,32 @@ runs:
             match="renku=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku reference: ${BASH_REMATCH[1]}"
-              echo "::set-output name=renku::@${BASH_REMATCH[1]}"
+              echo "renku=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
             match="renku-core=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku-core reference: ${BASH_REMATCH[1]}"
-              echo "::set-output name=renku-core::@${BASH_REMATCH[1]}"
+              echo "renku-core=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
             match="renku-gateway=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku-gateway reference: ${BASH_REMATCH[1]}"
-              echo "::set-output name=renku-gateway::@${BASH_REMATCH[1]}"
+              echo "renku-gateway=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
             match="renku-graph=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku-graph reference: ${BASH_REMATCH[1]}"
-              echo "::set-output name=renku-graph::@${BASH_REMATCH[1]}"
+              echo "renku-graph=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
             match="renku-notebooks=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku-notebooks reference: ${BASH_REMATCH[1]}"
-              echo "::set-output name=renku-notebooks::@${BASH_REMATCH[1]}"
+              echo "renku-notebooks=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
             match="renku-ui=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku-ui reference: ${BASH_REMATCH[1]}"
-              echo "::set-output name=renku-ui::@${BASH_REMATCH[1]}"
+              echo "renku-ui=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
             match="#notest"
             if [[ $command =~ $match ]]; then
@@ -95,14 +95,14 @@ runs:
             match="extra-values=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "extra values: ${BASH_REMATCH[1]}"
-              echo "::set-output name=extra-values::${BASH_REMATCH[1]}"
+              echo "extra-values=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
           else
             echo "No command found"
           fi
         fi
         echo "Test enabled: $test_enabled"
-        echo "::set-output name=test-enabled::${test_enabled}"
+        echo "test-enabled=${test_enabled}" >> $GITHUB_OUTPUT
         echo "Persist CI deployment after tests: $persist"
-        echo "::set-output name=persist::${persist}"
+        echo "persist=${persist}" >> $GITHUB_OUTPUT
       shell: bash
