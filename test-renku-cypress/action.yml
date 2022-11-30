@@ -1,0 +1,78 @@
+name: "test-renku-cypress"
+description: "Run the cypress acceptance tests for a Renku CI deployment"
+inputs:
+  gitlab-token:
+    description: "A gitlab token used for the cleanup of application in Gitlab."
+    required: true
+  renku:
+    description: "The reference (e.g., branch/commit/tag) of renku to check out."
+    required: false
+    default: "master"
+  renku-release:
+    description: "The name of the helm release."
+    required: true
+  test-timeout-mins:
+    description: "The timeout in mins to wait for the helm tests to complete."
+    required: false
+    default: "60"
+  test-user-email:
+    description: "The email address of the test user"
+    required: false
+    default: "renku@datascience.ch"
+  test-user-password:
+    description: "The password of the test user"
+    required: true
+    default: ""
+  # We currently do not tear-down the renku deployment after the tests run, so this is not necessary
+  # kubeconfig:
+  #   description: "The contents of the kubeconfig file to be used for helm/kubectl commands."
+  #   required: true
+  # persist:
+  #   description: "Whether the CI deployment should be kept after the tests finish or not."
+  #   required: false
+  #   default: "false"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: SwissDataScienceCenter/renku
+        path: renku
+        ref: ${{ inputs.renku }}
+    - uses: cypress-io/github-action@v4
+      id: cypress
+      env:
+        TEST_EMAIL: ${{ inputs.test-user-email }}
+        TEST_PASSWORD: ${{ inputs.test-user-password }}
+        TEST_FIRST_NAME: Renku
+        TEST_LAST_NAME: Bot
+        TEST_USERNAME: renku-test
+        BASE_URL: https://${{ inputs.renku-release }}.dev.renku.ch
+      with:
+        browser: chrome
+        working-directory: renku/cypress-tests
+    # NOTE: cypress screenshots will be generated only if the test failed
+    # thus we store screenshots only on failures
+    - uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: cypress-at-screenshots
+        path: renku/cypress-tests/cypress/screenshots
+        retention-days: 7
+    # Cypress test video is always captured, so this action uses "always()" condition
+    - uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: cypress-at-videos
+        path: renku/cypress-tests/cypress/videos
+        retention-days: 3
+    # Do not tear down the renku deployment in this action -- only the selenium tests do this
+    # - name: "Cleanup CI deployment after test if persist flag set to false"
+    #   uses: SwissDataScienceCenter/renku-actions/cleanup-renku-ci-deployments@v1.0.0
+    #   if: ${{ always() && inputs.persist == 'false' }}
+    #   env:
+    #     RENKUBOT_KUBECONFIG: ${{ inputs.kubeconfig }}
+    #     HELM_RELEASE_REGEX: "^${{ inputs.renku-release }}$"
+    #     MAX_AGE_SECONDS: "0"
+    #     GITLAB_TOKEN: ${{ inputs.gitlab-token }}
+    #     DELETE_NAMESPACE: "false"
