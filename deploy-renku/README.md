@@ -19,7 +19,7 @@ deploy-pr:
   environment:
     name: ci-renku-${{ github.event.number }}
   steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: renku build and deploy
     if: needs.check-deploy.outputs.pr-contains-string == 'true'
     uses: SwissDataScienceCenter/renku-actions/deploy-renku@v0.3.2
