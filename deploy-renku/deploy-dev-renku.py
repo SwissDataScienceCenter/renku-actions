@@ -9,12 +9,14 @@
 # RENKU_NAMESPACE
 # RENKU_ANONYMOUS_SESSIONS
 
-import argparse
+import json
 import os
 import pprint
 import tempfile
+import urllib.request
 
 from pathlib import Path
+from packaging.version import Version
 from subprocess import check_call
 
 import yaml
@@ -122,6 +124,38 @@ def configure_requirements(tempdir, reqs, component_versions):
                     continue
     return reqs
 
+def set_rp_version(values_file, reqs):
+    """Set appropriate renku-python release candidate version in values if full version isn't released yet."""
+    with open(values_file) as f:
+        values = yaml.load(f, Loader=yaml.SafeLoader)
+
+    if values.get("global", {}).get("renku", {}).get("cli_version"):
+        # version is already set
+        return
+
+    core_version = next(dep["version"] for dep in reqs["dependencies"] if dep["name"] == "renku-core")
+
+    # get current rp versions from pypi
+    with urllib.request.urlopen("https://pypi.org/pypi/renku/json") as f:
+        rp_pypi_data = json.load(f)
+
+    # get newest version available
+    rp_versions = [Version(k) for k in rp_pypi_data["releases"].keys() if k.startswith(core_version)]
+    newest_version = sorted(rp_versions)[-1]
+
+    print(f"Setting renku cli version to {newest_version}")
+
+    if "global" not in values:
+        values["global"] = {}
+
+    if "renku" not in values["global"]:
+        values["global"]["renku"] = {}
+
+    values["global"]["renku"]["cli_version"] = str(newest_version)
+
+    with open(values_file, "w") as f:
+        yaml.dump(values, f, default_flow_style=False)
+
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
@@ -178,7 +212,11 @@ if __name__ == "__main__":
     ## 3. render the renku chart for deployment
     renku_req.chartpress()
 
-    ## 4. deploy
+    ## 4. set renku-python release candidate version if applicable
+    set_rp_version(args.values_file, reqs)
+
+
+    ## 5. deploy
     values_file = args.values_file
     release = args.release
     namespace = args.namespace or release
