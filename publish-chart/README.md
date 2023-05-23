@@ -8,7 +8,7 @@ It can simply be used as a step in a GitHub actions job:
 
 ```yaml
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
     - uses: SwissDataScienceCenter/renku/actions/publish-chart@master
