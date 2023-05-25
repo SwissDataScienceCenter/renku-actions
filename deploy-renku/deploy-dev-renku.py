@@ -124,12 +124,12 @@ def configure_requirements(tempdir, reqs, component_versions):
                     continue
     return reqs
 
-def set_rp_version(values_file, reqs):
+def set_rp_version(values_file, extra_values, reqs):
     """Set appropriate renku-python release candidate version in values if full version isn't released yet."""
     with open(values_file) as f:
         values = yaml.load(f, Loader=yaml.SafeLoader)
 
-    if values.get("global", {}).get("renku", {}).get("cli_version"):
+    if values.get("global", {}).get("renku", {}).get("cli_version") or "global.renku.cli_version" in extra_values:
         # version is already set
         return
 
@@ -141,7 +141,12 @@ def set_rp_version(values_file, reqs):
 
     # get newest version available
     rp_versions = [Version(k) for k in rp_pypi_data["releases"].keys() if k.startswith(core_version)]
-    newest_version = sorted(rp_versions)[-1]
+
+    if not rp_versions:
+        # fall back to using latest version
+        newest_version = sorted([Version(k) for k in rp_pypi_data["releases"].keys()])[-1]
+    else:
+        newest_version = sorted(rp_versions)[-1]
 
     print(f"Setting renku cli version to {newest_version}")
 
@@ -213,7 +218,7 @@ if __name__ == "__main__":
     renku_req.chartpress()
 
     ## 4. set renku-python release candidate version if applicable
-    set_rp_version(args.values_file, reqs)
+    set_rp_version(args.values_file, args.extra_values, reqs)
 
 
     ## 5. deploy
