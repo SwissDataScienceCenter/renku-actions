@@ -48,7 +48,7 @@ runs:
       run: |
         echo "Target PR: https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ inputs.pr_ref }}"
         pr_text=$(curl -s https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ inputs.pr_ref }} | jq '.body')
-        pr_contains_string=$(if [ -z "$pr_text" ]; then echo "false"; else echo $pr_text | jq 'test("${{ inputs.string }}")'; fi)
+        pr_contains_string=$(echo $pr_text | jq 'test("${{ inputs.string }}")' || echo "false")
         echo "pr-contains-string=$pr_contains_string" >> $GITHUB_OUTPUT
         echo "String found: $pr_contains_string"
         test_enabled=true
