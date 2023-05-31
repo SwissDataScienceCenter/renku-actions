@@ -129,7 +129,7 @@ def set_rp_version(values_file, extra_values, reqs):
     with open(values_file) as f:
         values = yaml.load(f, Loader=yaml.SafeLoader)
 
-    if values.get("global", {}).get("renku", {}).get("cli_version") or "global.renku.cli_version" in extra_values:
+    if values.get("global", {}).get("renku", {}).get("cli_version") or (extra_values and "global.renku.cli_version" in extra_values):
         # version is already set
         return
 
