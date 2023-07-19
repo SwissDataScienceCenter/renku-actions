@@ -1,16 +1,44 @@
-name: "test-renku-cypress"
-description: "Run the cypress acceptance tests for a Renku CI deployment"
+name: Cypress acceptance tests
+description: "Run the Cypress acceptance tests for a Renku deployment"
 inputs:
-  gitlab-token:
-    description: "A gitlab token used for the cleanup of application in Gitlab."
+  e2e-folder:
+    description: "The folder containing the Cypress tests"
+    required: false
+    default: "cypress/e2e/"
+  e2e-infrastructure-check:
+    description: "The Cypress test to check the infrastructure"
+    required: false
+    default: "verifyInfrastructure"
+  e2e-suffix:
+    description: "The suffix of the Cypress tests"
+    required: false
+    default: ".cy.ts"
+  e2e-target:
+    description: "The target spec to execute"
     required: true
-  renku:
-    description: "The reference (e.g., branch/commit/tag) of renku to check out."
+  renku-path:
+    description: "The path to the Renku repository."
+    required: false
+    default: "renku"
+  renku-reference:
+    description: "The reference (e.g., branch/commit/tag) on the Renku repository to check out."
     required: false
     default: "master"
   renku-release:
-    description: "The name of the helm release."
+    description: "The name of the Renku helm release."
     required: true
+  renku-repository:
+    description: "The name of the Renku repository."
+    required: false
+    default: "SwissDataScienceCenter/renku"
+  settings-browser:
+    description: "The browser to use for the Cypress tests"
+    required: false
+    default: "chrome"
+  settings-working-directory:
+    description: "The working directory for the Cypress tests"
+    required: false
+    default: "renku/cypress-tests"
   test-timeout-mins:
     description: "The timeout in mins to wait for the helm tests to complete."
     required: false
@@ -19,60 +47,59 @@ inputs:
     description: "The email address of the test user"
     required: false
     default: "renku@datascience.ch"
+  test-user-firstname:
+    description: "The first name of the test user"
+    required: false
+    default: "Renku"
+  test-user-lastname:
+    description: "The last name of the test user"
+    required: false
+    default: "Bot"
   test-user-password:
     description: "The password of the test user"
     required: true
-    default: ""
-  # We currently do not tear-down the renku deployment after the tests run, so this is not necessary
-  # kubeconfig:
-  #   description: "The contents of the kubeconfig file to be used for helm/kubectl commands."
-  #   required: true
-  # persist:
-  #   description: "Whether the CI deployment should be kept after the tests finish or not."
-  #   required: false
-  #   default: "false"
+  test-user-username:
+    description: "The username of the test user"
+    required: false
+    default: "renku-test"
+
 runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
+      name: "Checkout the Renku repository"
       with:
-        repository: SwissDataScienceCenter/renku
-        path: renku
-        ref: ${{ inputs.renku }}
-    - uses: cypress-io/github-action@v4
-      id: cypress
+        repository: ${{ inputs.renku-repository }}
+        path: ${{ inputs.renku-path }}
+        ref: ${{ inputs.renku-reference }}
+    - uses: cypress-io/github-action@v5
+      name: "Verify infrastructure and run the target Cypress test"
+      id: cypress-acceptance-tests
       env:
-        TEST_EMAIL: ${{ inputs.test-user-email }}
-        TEST_PASSWORD: ${{ inputs.test-user-password }}
-        TEST_FIRST_NAME: Renku
-        TEST_LAST_NAME: Bot
-        TEST_USERNAME: renku-test
         BASE_URL: https://${{ inputs.renku-release }}.dev.renku.ch
+        TEST_EMAIL: ${{ inputs.test-user-email }}
+        TEST_FIRST_NAME: ${{ inputs.test-user-firstname }}
+        TEST_LAST_NAME: ${{ inputs.test-user-lastname }}
+        TEST_PASSWORD: ${{ inputs.test-user-password }}
+        TEST_USERNAME: ${{ inputs.test-user-username }}
       with:
-        browser: chrome
-        working-directory: renku/cypress-tests
-    # NOTE: cypress screenshots will be generated only if the test failed
-    # thus we store screenshots only on failures
+        browser: ${{ inputs.settings-browser }}
+        spec: |
+          ${{ inputs.e2e-folder }}${{ inputs.e2e-infrastructure-check }}${{ inputs.e2e-suffix }}
+          ${{ inputs.e2e-folder }}${{ inputs.e2e-target }}${{ inputs.e2e-suffix }}
+        working-directory: ${{ inputs.settings-working-directory }}
     - uses: actions/upload-artifact@v3
       if: failure()
       with:
-        name: cypress-at-screenshots
-        path: renku/cypress-tests/cypress/screenshots
+        name: Cypress acceptance tests - screenshots
+        path: "{{ settings-working-directory }}/cypress/screenshots"
         retention-days: 7
-    # Cypress test video is always captured, so this action uses "always()" condition
     - uses: actions/upload-artifact@v3
-      if: always()
+      if: failure()
       with:
-        name: cypress-at-videos
-        path: renku/cypress-tests/cypress/videos
+        name: Cypress acceptance tests - videos
+        path: "{{ settings-working-directory }}/cypress/videos"
         retention-days: 3
-    # Do not tear down the renku deployment in this action -- only the selenium tests do this
-    # - name: "Cleanup CI deployment after test if persist flag set to false"
-    #   uses: SwissDataScienceCenter/renku-actions/cleanup-renku-ci-deployments@v1.0.0
-    #   if: ${{ always() && inputs.persist == 'false' }}
-    #   env:
-    #     RENKUBOT_KUBECONFIG: ${{ inputs.kubeconfig }}
-    #     HELM_RELEASE_REGEX: "^${{ inputs.renku-release }}$"
-    #     MAX_AGE_SECONDS: "0"
-    #     GITLAB_TOKEN: ${{ inputs.gitlab-token }}
-    #     DELETE_NAMESPACE: "false"
+
+# TODO: add the logic to tear down the renku deployment once selenium tests are phased out
+# ? - name: "Cleanup CI deployment after test if persist flag set to false"
