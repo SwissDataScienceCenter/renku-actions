@@ -98,13 +98,13 @@ runs:
       if: failure()
       with:
         name: Cypress acceptance tests - screenshots
-        path: "{{ inputs.settings-working-directory }}/cypress/screenshots"
+        path: ${{ inputs.settings-working-directory }}/cypress/screenshots
         retention-days: 7
     - uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: Cypress acceptance tests - videos
-        path: "{{ inputs.settings-working-directory }}/cypress/videos"
+        path: ${{ inputs.settings-working-directory }}/cypress/videos
         retention-days: 3
 
 # TODO: add the logic to tear down the renku deployment once selenium tests are phased out
