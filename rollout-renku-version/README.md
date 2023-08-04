@@ -1,6 +1,6 @@
 # Action for updating component version
 
-This is a docker action that will update the Renku version (rollout) in the deployments managed by terraform.
+This is a docker action that will update the Renku version (rollout) in the deployments managed by Terraform.
 
 ## Sample usage
 
