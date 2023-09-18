@@ -28,7 +28,13 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        tests: [publicProject, updateProjects, useSession]
+        tests:
+          - publicProject
+          - privateProject
+          - updateProjects
+          - testDatasets
+          - useSession
+          - checkWorkflows
     steps:
       - name: Extract Renku repository reference
         run: echo "RENKU_REFERENCE=`echo '${{ needs.check-deploy.outputs.renku }}' | cut -d'@' -f2`" >> $GITHUB_ENV

@@ -49,21 +49,11 @@ the `extra-values` option.
 ### Skipping tests
 
 The `#notest` string will falsify the otherwise truthy variable named `test-enabled`,
-for example
+skipping all the acceptance tests.
 
 ```
 /deploy renku-ui=0.11.9 #notest
 ```
-
-### Running Cypress acceptance tests
-
-The `#cypress` string will set to true the otherwise falsy variable named `test-cypress-enabled`, for example
-
-```
-/deploy #cypress
-```
-
-This can be used to make decisions about running the cypress acceptance tests.
 
 ## Procedures for renku platform PRs
 
