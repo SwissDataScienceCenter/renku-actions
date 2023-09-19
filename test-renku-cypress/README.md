@@ -28,7 +28,13 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        tests: [publicProject, updateProjects, useSession]
+        tests:
+          - publicProject
+          - privateProject
+          - updateProjects
+          - testDatasets
+          - useSession
+          - checkWorkflows
     steps:
       - name: Extract Renku repository reference
         run: echo "RENKU_REFERENCE=`echo '${{ needs.check-deploy.outputs.renku }}' | cut -d'@' -f2`" >> $GITHUB_ENV
@@ -39,18 +45,3 @@ jobs:
           renku-release: renku-ci-ui-${{ github.event.number }}
           test-user-password: ${{ secrets.RENKU_BOT_DEV_PASSWORD }}
 ```
-
-# Interaction with Selenium-based acceptance tests
-
-This action **does not** tear down the deployment, but the `test-renku` action to run the Selenium-based tests does, and some care needs to be taken when running the Cypress tests without running the Selenium tests.
-
-Specifically, it is necessary to persist the deployment using the `#persist` flag.
-
-```
-/deploy #persist
-```
-
-Mind that not using the `#persist` flag will result in the deployment being torn down after the Selenium tests; this _should_ work when both tests run in parallel since Selenium tests are generally slower, but this is not guarantend.
-
-Also, re-running only Cypress tests would not work since the deployment will not be available anymore.
-

@@ -35,12 +35,6 @@ outputs:
   test-enabled:
     description: whether the selenium tests should run or not
     value: ${{ steps.check-string.outputs.test-enabled }}
-  test-cypress-enabled:
-    description: whether the cypress tests should run or not
-    value: ${{ steps.check-string.outputs.test-cypress-enabled }}
-  persist:
-    description: whether the CI deployment should be kept after the acceptance tests complete
-    value: ${{ steps.check-string.outputs.persist }}
 runs:
   using: "composite"
   steps:
@@ -52,8 +46,6 @@ runs:
         echo "pr-contains-string=$pr_contains_string" >> $GITHUB_OUTPUT
         echo "String found: $pr_contains_string"
         test_enabled=true
-        cypress_enabled=false
-        persist=false
         if [ "$pr_contains_string" = true ] ; then
           command=$(echo $pr_text | jq -r 'split("${{ inputs.string }} ") | last | split("\r\n") | first')
           if [[ $command != *"${{ inputs.string }}"* ]]; then
@@ -92,14 +84,6 @@ runs:
             if [[ $command =~ $match ]]; then
               test_enabled=false
             fi
-            match="#cypress"
-            if [[ $command =~ $match ]]; then
-              cypress_enabled=true
-            fi
-            match="#persist"
-            if [[ $command =~ $match ]]; then
-              persist=true
-            fi
             match="extra-values=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "extra values: ${BASH_REMATCH[1]}"
@@ -111,8 +95,4 @@ runs:
         fi
         echo "Test enabled: $test_enabled"
         echo "test-enabled=${test_enabled}" >> $GITHUB_OUTPUT
-        echo "Cypress enabled: $cypress_enabled"
-        echo "test-cypress-enabled=${cypress_enabled}" >> $GITHUB_OUTPUT
-        echo "Persist CI deployment after tests: $persist"
-        echo "persist=${persist}" >> $GITHUB_OUTPUT
       shell: bash

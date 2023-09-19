@@ -39,10 +39,6 @@ inputs:
     description: "The working directory for the Cypress tests"
     required: false
     default: "renku/cypress-tests"
-  test-timeout-mins:
-    description: "The timeout in mins to wait for the helm tests to complete."
-    required: false
-    default: "60"
   test-user-email:
     description: "The email address of the test user"
     required: false
@@ -106,6 +102,3 @@ runs:
         name: Cypress acceptance tests - videos
         path: ${{ inputs.settings-working-directory }}/cypress/videos
         retention-days: 3
-
-# TODO: add the logic to tear down the renku deployment once selenium tests are phased out
-# ? - name: "Cleanup CI deployment after test if persist flag set to false"

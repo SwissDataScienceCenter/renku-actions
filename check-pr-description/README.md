@@ -49,33 +49,10 @@ the `extra-values` option.
 ### Skipping tests
 
 The `#notest` string will falsify the otherwise truthy variable named `test-enabled`,
-for example
+skipping all the acceptance tests.
 
 ```
 /deploy renku-ui=0.11.9 #notest
-```
-
-### Running Cypress acceptance tests
-
-The `#cypress` string will set to true the otherwise falsy variable named `test-cypress-enabled`, for example
-
-```
-/deploy #cypress
-```
-
-This can be used to make decisions about running the cypress acceptance tests.
-
-### Persisting a deployment after the tests are complete
-
-The `#persist` string will set the `persist` flag to `true` which is `false` by default.
-The `persist` parameter in the action output can then be used to signal to the `test-renku`
-action that the Renku deployment should not be deleted (i.e. it should perisist) after the
-tests complete.
-
-For example:
-
-```
-/deploy renku-ui=0.11.9 #persist
 ```
 
 ## Procedures for renku platform PRs
