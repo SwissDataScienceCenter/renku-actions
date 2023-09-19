@@ -28,9 +28,6 @@ inputs:
   s3-results-secret-key:
     description: Secret key to the S3 bucket where the tests artifacts have been stored
     required: true
-  s3-results-artifacts-path:
-    description: Path within the S3 bucket where the tests artifacts have been stored
-    required: true
   test-timeout-mins:
     description: "The timeout in mins to wait for the helm tests to complete."
     required: false

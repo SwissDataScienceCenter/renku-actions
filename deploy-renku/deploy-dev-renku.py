@@ -241,6 +241,8 @@ if __name__ == "__main__":
         namespace,
         "--timeout",
         "20m",
+        "--wait",
+        "--wait-for-jobs",
     ]
 
     if os.getenv("TEST_ARTIFACTS_PATH"):
