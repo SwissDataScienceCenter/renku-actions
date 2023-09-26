@@ -9,7 +9,8 @@ RUN apk add python3 docker jq && \
     kubernetes \
     'ruamel.yaml<0.17.10' \
     'ruamel.yaml.clib<0.2.4' \
-    'packaging==23.1'
+    'packaging==23.1' \
+    json-merge-patch
 
 COPY deploy-dev-renku.py entrypoint.sh /
 ENTRYPOINT /entrypoint.sh
