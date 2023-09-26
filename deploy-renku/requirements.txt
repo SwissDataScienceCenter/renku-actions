@@ -1,0 +1,4 @@
+chartpress==2.1.0
+kubernetes
+packaging
+json-merge-patch
