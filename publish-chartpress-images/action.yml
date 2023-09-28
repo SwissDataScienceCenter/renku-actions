@@ -1,0 +1,8 @@
+name: 'publish-chartpress-images'
+description: 'Build and push images with chartrpress.'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+branding:
+  icon: 'activity'
+  color: 'blue'

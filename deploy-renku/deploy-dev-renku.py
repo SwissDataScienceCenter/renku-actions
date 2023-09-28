@@ -12,14 +12,15 @@
 import json
 import os
 import pprint
+import re
 import tempfile
 import urllib.request
-
+import yaml
 from pathlib import Path
-from packaging.version import Version
 from subprocess import check_call
 
-import yaml
+import json_merge_patch
+from packaging.version import Version
 
 components = ["renku-core", "renku-gateway", "renku-graph", "renku-notebooks", "renku-ui"]
 
@@ -52,6 +53,14 @@ class RenkuRequirement(object):
                 chart = yaml.load(f, Loader=yaml.SafeLoader)
             return chart.get("version")
         return self.version_
+
+    @property
+    def values(self) -> dict:
+        self.clone()
+        self.chartpress(skip_build=True)
+        with open(self.repo_dir / "helm-chart" / self.component / "values.yaml") as f:
+            values = yaml.load(f, Loader=yaml.SafeLoader)
+        return values
 
     @property
     def helm_repo(self):
@@ -97,43 +106,47 @@ class RenkuRequirement(object):
             cmd.append("--skip-build")
         check_call(cmd, cwd=self.repo_dir)
 
+    def update_values(self, values_file: Path) -> dict:
+        with open(values_file, "r") as f:
+            old_values = yaml.load(f, Loader=yaml.SafeLoader)
+        new_values = json_merge_patch.merge(old_values, self.values)
+        with open(values_file, "w") as f:
+            yaml.dump(new_values, f, default_flow_style=False)
+        return self.values
+
     def setup(self):
         """Checkout the repo and run chartpress."""
         self.clone()
         self.chartpress()
 
 
-def configure_requirements(tempdir, reqs, component_versions):
+def configure_component_versions(component_versions: dict, values_file: Path) -> dict:
     """
-    Reads versions from environment variables and renders the requirements.yaml file.
-
-    If any of the requested versions reference a git ref, the chart is rendered and
-    images built and pushed to dockerhub.
+    Builds and updates the components images into the Renku values file.
     """
+    patches = {}
     for component, version in component_versions.items():
         if version:
             # form and setup the requirement
             req = RenkuRequirement(component.replace("_", "-"), version, tempdir)
             if req.ref:
                 req.setup()
-                # replace the requirement
-            for dep in reqs["dependencies"]:
-                if dep["name"] == component.replace("_", "-"):
-                    dep["version"] = req.version
-                    dep["repository"] = req.helm_repo
-                    continue
-    return reqs
+                patches[component] = req.update_values(values_file)
+    return patches
 
-def set_rp_version(values_file, extra_values, reqs):
+def set_rp_version(values_file, extra_values):
     """Set appropriate renku-python release candidate version in values if full version isn't released yet."""
     with open(values_file) as f:
         values = yaml.load(f, Loader=yaml.SafeLoader)
 
     if values.get("global", {}).get("renku", {}).get("cli_version") or (extra_values and "global.renku.cli_version" in extra_values):
-        # version is already set
+        print("CLI version for new projects is overriden in values file.")
         return
 
-    core_version = next(dep["version"] for dep in reqs["dependencies"] if dep["name"] == "renku-core")
+    core_version = values.get("global", {}).get("core", {}).get("versions", {}).get("latest", {}).get("image", {}).get("tag", "unknown")
+    if re.match(r"^v[0-9]+\.[0-9]+\.[0-9]+.*", core_version):
+        # NOTE: Remove the starting "v" present in a version tag for an image
+        core_version = core_version[1:]
 
     # get current rp versions from pypi
     with urllib.request.urlopen("https://pypi.org/pypi/renku/json") as f:
@@ -198,28 +211,20 @@ if __name__ == "__main__":
     tempdir = Path(tempdir_.name)
 
     renku_dir = tempdir / "renku"
-    reqs_path = renku_dir / "helm-chart/renku/requirements.yaml"
+    values_file = renku_dir / "helm-chart/renku/values.yaml"
 
     ## 1. clone the renku repo
     renku_req = RenkuRequirement(component="renku", version=args.renku or "@master", tempdir=tempdir)
     renku_req.clone()
 
-    with open(reqs_path) as f:
-        reqs = yaml.load(f, Loader=yaml.SafeLoader)
-
-    ## 2. set the chosen versions in the requirements.yaml file
-
-    reqs = configure_requirements(tempdir, reqs, component_versions)
-
-    with open(reqs_path, "w") as f:
-        yaml.dump(reqs, f)
+    ## 2. set the chosen versions in the values.yaml file
+    values_patches = configure_component_versions(component_versions, values_file)
 
     ## 3. render the renku chart for deployment
     renku_req.chartpress()
 
     ## 4. set renku-python release candidate version if applicable
-    set_rp_version(args.values_file, args.extra_values, reqs)
-
+    set_rp_version(args.values_file, args.extra_values)
 
     ## 5. deploy
     values_file = args.values_file
@@ -227,7 +232,7 @@ if __name__ == "__main__":
     namespace = args.namespace or release
 
     print(f'*** Dependencies for release "{release}" under namespace "{namespace}" ***')
-    pprint.pp(reqs)
+    pprint.pp(values_patches)
 
     helm_command = [
         "helm",

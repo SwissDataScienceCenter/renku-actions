@@ -1,0 +1,6 @@
+chartpress==2.1.0
+kubernetes
+packaging
+json-merge-patch
+ruamel.yaml<0.17.10
+ruamel.yaml.clib<0.2.4

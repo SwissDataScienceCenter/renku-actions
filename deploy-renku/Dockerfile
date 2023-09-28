@@ -1,15 +1,11 @@
-FROM alpine/k8s:1.21.12
+FROM alpine/k8s:1.23.17
 
 # install dependencies
-RUN apk add python3 docker jq && \
+COPY requirements.txt /
+RUN apk add --no-cache python3 docker jq && \
     wget -O /usr/bin/yq "https://github.com/mikefarah/yq/releases/download/3.1.1/yq_linux_amd64" && \
     chmod a+x /usr/bin/yq && \
-    pip3 install -U pip \
-    chartpress==1.0.0 \
-    kubernetes \
-    'ruamel.yaml<0.17.10' \
-    'ruamel.yaml.clib<0.2.4' \
-    'packaging==23.1'
+    pip3 install -r /requirements.txt
 
 COPY deploy-dev-renku.py entrypoint.sh /
 ENTRYPOINT /entrypoint.sh
