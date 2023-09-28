@@ -1,6 +1,6 @@
 # Action for updating component version
 
-This is a docker action that will update the version of a dependency in the main
+This is a docker action that will update the version of a component in the main
 Renku chart.
 
 ## Sample usage
@@ -25,7 +25,7 @@ You can set these environment variables:
 
 | Variable name | Default |
 | --------------| --------|
-| CHART_NAME    | name of the repository |
+| COMPONENT_NAME| name of the repository |
 | UPSTREAM_REPO | SwissDataScienceCenter/renku |
 | GIT_EMAIL     | renku@datascience.ch |
 | GIT_USER      | Renku Bot |
