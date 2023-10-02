@@ -265,5 +265,6 @@ if __name__ == "__main__":
         stdout=sys.stdout,
         stderr=sys.stderr
     )
-
+    sys.stdout.flush()
+    sys.stderr.flush()
     tempdir_.cleanup()
