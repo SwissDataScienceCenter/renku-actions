@@ -13,6 +13,7 @@ import json
 import os
 import pprint
 import re
+import sys
 import tempfile
 import urllib.request
 import yaml
@@ -261,6 +262,8 @@ if __name__ == "__main__":
     check_call(
         helm_command,
         cwd=renku_dir / "helm-chart",
+        stdout=sys.stdout,
+        stderr=sys.stderr
     )
 
     tempdir_.cleanup()
