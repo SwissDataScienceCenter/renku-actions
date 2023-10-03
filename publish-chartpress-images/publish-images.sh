@@ -16,6 +16,8 @@ fi
 # log in to docker
 echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
 
+# if this is not run then git complains that the repo directory is untrusted and fails
+git config --global --add safe.directory $PWD
 # build and push the chart and images
 cd $CHARTPRESS_SPEC_DIR
 chartpress --push $CHART_TAG $IMAGE_PREFIX
