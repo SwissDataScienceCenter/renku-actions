@@ -18,7 +18,7 @@ import tempfile
 import urllib.request
 import yaml
 from pathlib import Path
-from subprocess import check_call
+from subprocess import run
 
 import json_merge_patch
 from packaging.version import Version
@@ -259,12 +259,15 @@ if __name__ == "__main__":
         helm_command += ["--set", args.extra_values]
 
     # deploy the main chart
-    check_call(
-        helm_command,
-        cwd=renku_dir / "helm-chart",
-        stdout=sys.stdout,
-        stderr=sys.stderr
-    )
-    sys.stdout.flush()
-    sys.stderr.flush()
-    tempdir_.cleanup()
+    try:
+        run(
+            helm_command,
+            cwd=renku_dir / "helm-chart",
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+            check=True
+        )
+    finally:
+        sys.stdout.flush()
+        sys.stderr.flush()
+        tempdir_.cleanup()
