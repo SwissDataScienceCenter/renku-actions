@@ -22,7 +22,14 @@ from subprocess import check_call
 import json_merge_patch
 from packaging.version import Version
 
-components = ["renku-core", "renku-gateway", "renku-graph", "renku-notebooks", "renku-ui"]
+components = [
+    "renku-core",
+    "renku-gateway",
+    "renku-graph",
+    "renku-notebooks",
+    "renku-ui",
+    "renku-data-services",
+]
 
 
 class RenkuRequirement(object):
@@ -49,7 +56,9 @@ class RenkuRequirement(object):
         if self.is_git_ref:
             self.clone()
             self.chartpress(skip_build=True)
-            with open(self.repo_dir / "helm-chart" / self.component / "Chart.yaml") as f:
+            with open(
+                self.repo_dir / "helm-chart" / self.component / "Chart.yaml"
+            ) as f:
                 chart = yaml.load(f, Loader=yaml.SafeLoader)
             return chart.get("version")
         return self.version_
@@ -100,7 +109,9 @@ class RenkuRequirement(object):
 
     def chartpress(self, skip_build=False):
         """Run chartpress."""
-        check_call(["helm", "dep", "update", f"helm-chart/{self.component}"], cwd=self.repo_dir)
+        check_call(
+            ["helm", "dep", "update", f"helm-chart/{self.component}"], cwd=self.repo_dir
+        )
         cmd = ["chartpress", "--push"]
         if skip_build:
             cmd.append("--skip-build")
@@ -134,16 +145,26 @@ def configure_component_versions(component_versions: dict, values_file: Path) ->
                 patches[component] = req.update_values(values_file)
     return patches
 
+
 def set_rp_version(values_file, extra_values):
     """Set appropriate renku-python release candidate version in values if full version isn't released yet."""
     with open(values_file) as f:
         values = yaml.load(f, Loader=yaml.SafeLoader)
 
-    if values.get("global", {}).get("renku", {}).get("cli_version") or (extra_values and "global.renku.cli_version" in extra_values):
+    if values.get("global", {}).get("renku", {}).get("cli_version") or (
+        extra_values and "global.renku.cli_version" in extra_values
+    ):
         print("CLI version for new projects is overriden in values file.")
         return
 
-    core_version = values.get("global", {}).get("core", {}).get("versions", {}).get("latest", {}).get("image", {}).get("tag", "unknown")
+    core_version = (
+        values.get("global", {})
+        .get("core", {})
+        .get("versions", {})
+        .get("latest", {})
+        .get("image", {})
+        .get("tag", "unknown")
+    )
     if re.match(r"^v[0-9]+\.[0-9]+\.[0-9]+.*", core_version):
         # NOTE: Remove the starting "v" present in a version tag for an image
         core_version = core_version[1:]
@@ -153,11 +174,17 @@ def set_rp_version(values_file, extra_values):
         rp_pypi_data = json.load(f)
 
     # get newest version available
-    rp_versions = [Version(k) for k in rp_pypi_data["releases"].keys() if k.startswith(core_version)]
+    rp_versions = [
+        Version(k)
+        for k in rp_pypi_data["releases"].keys()
+        if k.startswith(core_version)
+    ]
 
     if not rp_versions:
         # fall back to using latest version
-        newest_version = sorted([Version(k) for k in rp_pypi_data["releases"].keys()])[-1]
+        newest_version = sorted([Version(k) for k in rp_pypi_data["releases"].keys()])[
+            -1
+        ]
     else:
         newest_version = sorted(rp_versions)[-1]
 
@@ -186,7 +213,9 @@ if __name__ == "__main__":
             help=f"Version or ref for {component}",
             default=default if default else None,
         )
-    parser.add_argument("--renku", help="Main chart ref", default=os.environ.get("renku"))
+    parser.add_argument(
+        "--renku", help="Main chart ref", default=os.environ.get("renku")
+    )
     parser.add_argument(
         "--values-file",
         help="Value file path",
@@ -202,10 +231,14 @@ if __name__ == "__main__":
         help="Set additional values (comma-separated)",
         default=os.environ.get("extra_values"),
     )
-    parser.add_argument("--release", help="Release name", default=os.environ.get("RENKU_RELEASE"))
+    parser.add_argument(
+        "--release", help="Release name", default=os.environ.get("RENKU_RELEASE")
+    )
 
     args = parser.parse_args()
-    component_versions = {a: b for a, b in vars(args).items() if a.replace("_", "-") in components}
+    component_versions = {
+        a: b for a, b in vars(args).items() if a.replace("_", "-") in components
+    }
 
     tempdir_ = tempfile.TemporaryDirectory()
     tempdir = Path(tempdir_.name)
@@ -214,7 +247,9 @@ if __name__ == "__main__":
     values_file = renku_dir / "helm-chart/renku/values.yaml"
 
     ## 1. clone the renku repo
-    renku_req = RenkuRequirement(component="renku", version=args.renku or "@master", tempdir=tempdir)
+    renku_req = RenkuRequirement(
+        component="renku", version=args.renku or "@master", tempdir=tempdir
+    )
     renku_req.clone()
 
     ## 2. set the chosen versions in the values.yaml file
@@ -251,7 +286,10 @@ if __name__ == "__main__":
     ]
 
     if os.getenv("TEST_ARTIFACTS_PATH"):
-        helm_command += ["--set", f'tests.resultsS3.filename={os.getenv("TEST_ARTIFACTS_PATH")}']
+        helm_command += [
+            "--set",
+            f'tests.resultsS3.filename={os.getenv("TEST_ARTIFACTS_PATH")}',
+        ]
 
     # pass additional values to the deployment
     if args.extra_values:

@@ -23,6 +23,7 @@ The supported components are:
 - `renku-notebooks`
 - `renku-ui` (that includes the `renku-ui-server` component, since the version is
   aligned between the 2 components)
+- `renku-data-services`
 
 The reference will be stored in an output variable with the same name. For example,
 

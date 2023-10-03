@@ -29,6 +29,9 @@ outputs:
   renku-ui:
     description: renku-ui reference as specified in the command string
     value: ${{ steps.check-string.outputs.renku-ui }}
+  renku-data-services:
+    description: renku-data-services reference as specified in the command string
+    value: ${{ steps.check-string.outputs.renku-data-services }}
   extra-values:
     description: "extra values passed to helm; separate multiple values with commas: key1=val1,key2=val2"
     value: ${{ steps.check-string.outputs.extra-values }}
@@ -79,6 +82,11 @@ runs:
             if [[ $command =~ $match ]]; then
               echo "renku-ui reference: ${BASH_REMATCH[1]}"
               echo "renku-ui=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
+            fi
+            match="renku-data-services=(\S*)"
+            if [[ $command =~ $match ]]; then
+              echo "renku-data-services reference: ${BASH_REMATCH[1]}"
+              echo "renku-data-services=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
             match="#notest"
             if [[ $command =~ $match ]]; then
