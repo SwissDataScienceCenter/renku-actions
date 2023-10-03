@@ -18,7 +18,7 @@ import tempfile
 import urllib.request
 import yaml
 from pathlib import Path
-from subprocess import run
+from subprocess import run, check_call
 
 import json_merge_patch
 from packaging.version import Version
