@@ -1,2 +1,6 @@
 .env
 .venv
+.ropeproject
+# VSCode
+.vscode/*
+!.vscode/settings.json
