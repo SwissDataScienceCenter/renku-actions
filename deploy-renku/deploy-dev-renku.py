@@ -15,11 +15,11 @@ import pprint
 import re
 import tempfile
 import urllib.request
-import yaml
 from pathlib import Path
 from subprocess import check_call
 
 import json_merge_patch
+import yaml
 from packaging.version import Version
 
 components = [
@@ -29,6 +29,7 @@ components = [
     "renku-notebooks",
     "renku-ui",
     "renku-data-services",
+    "amalthea",
 ]
 
 
@@ -143,6 +144,17 @@ def configure_component_versions(component_versions: dict, values_file: Path) ->
             if req.ref:
                 req.setup()
                 patches[component] = req.update_values(values_file)
+            if component == "amalthea":
+                reqs_path = tempdir / "renku" / "helm-chart/renku/requirements.yaml"
+                with open(reqs_path) as f:
+                    reqs = yaml.load(f, Loader=yaml.SafeLoader)
+                for dep in reqs["dependencies"]:
+                    if dep["name"] == component.replace("_", "-"):
+                        dep["version"] = req.version
+                        dep["repository"] = req.helm_repo
+                        continue
+                with open(reqs_path, "w") as f:
+                    yaml.dump(reqs, f)
     return patches
 
 
