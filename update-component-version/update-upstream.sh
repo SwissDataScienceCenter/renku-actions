@@ -35,6 +35,7 @@ git config --global user.name "$GIT_USER"
 # update the chart requirements and push
 git checkout -b auto-update/${COMPONENT_NAME}-${COMPONENT_VERSION} ${UPSTREAM_BRANCH}
 yq m -x -i helm-chart/renku/values.yaml ../helm-chart/${COMPONENT_NAME}/values.yaml
+yamlfmt helm-chart/renku/values.yaml
 
 git add helm-chart/renku/values.yaml
 git commit -m "chore: updating ${COMPONENT_NAME} version to ${COMPONENT_VERSION}"
