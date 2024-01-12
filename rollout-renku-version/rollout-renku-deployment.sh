@@ -1,5 +1,5 @@
 #!/bin/bash
-set -xe
+set -e
 
 if [ -z "$GITHUB_TOKEN" ]
 then
@@ -47,7 +47,7 @@ do
     # update renku version and push
     git checkout -b auto-update/${CHART_NAME}-${CHART_VERSION}-${cluster} ${UPSTREAM_BRANCH}
 
-    yq -i '.spec.chart.spec.version = strenv(CHART_VERSION)' $cluster_dir/main/charts/renku.yaml
+    yq eval --inplace '.spec.chart.spec.version = strenv(CHART_VERSION)' $cluster_dir/main/charts/renku.yaml
     sed -i "/Renku version/c\            ### Renku version $CHART_VERSION ($DATE)" $cluster_dir/main/charts/renku.yaml
     sed -i "/Release Notes/c\            See the [Release Notes](https://github.com/${GITHUB_REPOSITORY}/releases/tag/$CHART_VERSION)" $cluster_dir/main/charts/renku.yaml
 

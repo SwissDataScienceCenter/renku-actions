@@ -1,5 +1,5 @@
 #!/bin/bash
-set -xe
+set -e
 
 if [ -z "$GITHUB_TOKEN" ]
 then
@@ -21,7 +21,7 @@ COMPONENT_NAME=${COMPONENT_NAME:=$(echo $GITHUB_REPOSITORY | cut -d/ -f2)}
 
 # build this chart to get the version
 chartpress --skip-build $COMPONENT_TAG
-COMPONENT_VERSION=$(yq r helm-chart/${COMPONENT_NAME}/Chart.yaml version)
+COMPONENT_VERSION=$(yq eval '.version' helm-chart/${COMPONENT_NAME}/Chart.yaml)
 
 git clone --depth=1 --branch=${UPSTREAM_BRANCH} https://${GITHUB_TOKEN}@github.com/${UPSTREAM_REPO} upstream-repo
 
@@ -34,7 +34,7 @@ git config --global user.name "$GIT_USER"
 
 # update the chart requirements and push
 git checkout -b auto-update/${COMPONENT_NAME}-${COMPONENT_VERSION} ${UPSTREAM_BRANCH}
-yq m -x -i helm-chart/renku/values.yaml ../helm-chart/${COMPONENT_NAME}/values.yaml
+yq eval-all --inplace '. as $item ireduce ({}; . * $item )' helm-chart/renku/values.yaml ../helm-chart/${COMPONENT_NAME}/values.yaml
 
 git add helm-chart/renku/values.yaml
 git commit -m "chore: updating ${COMPONENT_NAME} version to ${COMPONENT_VERSION}"

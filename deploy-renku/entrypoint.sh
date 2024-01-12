@@ -12,8 +12,14 @@ echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 # set up kube context and values file
 echo "$RENKUBOT_KUBECONFIG" > "$KUBECONFIG" && chmod 400 "$KUBECONFIG"
 
-# set up the values file
-printf "%s" "$RENKU_VALUES" | sed "s/<replace>/${RENKU_RELEASE}/" > $RENKU_VALUES_FILE
+export RENKU_VALUES_FILE="/renku-values.yaml"
+
+# merge the secret and clear value files
+printf "%s" "$RENKU_SECRET_VALUES" > $RENKU_VALUES_FILE
+yq eval-all --inplace '. as $item ireduce ({}; . * $item )' $RENKU_VALUES_FILE $RENKU_CLEAR_VALUES_FILE
+
+# replace the release name
+sed --in-place "s/<replace>/${RENKU_RELEASE}/" $RENKU_VALUES_FILE
 
 # register the GitLab app
 if test -n "$GITLAB_TOKEN" ; then
@@ -22,12 +28,12 @@ if test -n "$GITLAB_TOKEN" ; then
                         --data "name=${RENKU_RELEASE}" \
                         --data "redirect_uri=https://${RENKU_RELEASE}.dev.renku.ch/auth/realms/Renku/broker/dev-renku/endpoint https://${RENKU_RELEASE}.dev.renku.ch/api/auth/gitlab/token" \
                         --data "scopes=api read_user read_repository read_registry openid")
-  APP_ID=$(echo $gitlab_app | jq -r '.application_id')
-  APP_SECRET=$(echo $gitlab_app | jq -r '.secret')
+  export APP_ID=$(echo $gitlab_app | jq -r '.application_id')
+  export APP_SECRET=$(echo $gitlab_app | jq -r '.secret')
 
   # gateway gitlab app/secret
-  yq w -i $RENKU_VALUES_FILE "gateway.gitlabClientId" "$APP_ID"
-  yq w -i $RENKU_VALUES_FILE "gateway.gitlabClientSecret" "$APP_SECRET"
+  yq eval --inplace '.gateway.gitlabClientId = strenv(APP_ID)' $RENKU_VALUES_FILE
+  yq eval --inplace '.gateway.gitlabClientSecret = strenv(APP_SECRET)' $RENKU_VALUES_FILE
 fi
 
 # create namespace and ignore error in case it already exists
