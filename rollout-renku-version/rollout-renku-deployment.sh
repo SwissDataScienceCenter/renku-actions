@@ -20,7 +20,7 @@ GIT_EMAIL=${GIT_EMAIL:=renku@datascience.ch}
 GIT_USER=${GIT_USER:="Renku Bot"}
 CHART_NAME=${CHART_NAME:=$(echo $GITHUB_REPOSITORY | cut -d/ -f2)}
 PRODUCTION_DIR=${PRODUCTION_DIR:="gitops/production"}
-EXCLUDE_CLUSTERS=${EXCLUDE_CLUSTERS:="rancher renku-dev bit dslab-epfl unifr"}
+EXCLUDE_CLUSTERS=${EXCLUDE_CLUSTERS:="archive rancher renku-dev bit dslab-epfl unifr"}
 
 # set up git
 git config --global user.email "$GIT_EMAIL"
