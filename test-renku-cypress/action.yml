@@ -71,7 +71,7 @@ runs:
     - uses: actions/setup-node@v4
       name: Setup Node LTS
       with:
-        node-version: lts
+        node-version: lts/*
         cache: npm
         cache-dependency-path: ${{ inputs.settings-working-directory }}
     - uses: cypress-io/github-action@v6
