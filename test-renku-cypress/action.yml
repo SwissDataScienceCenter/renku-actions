@@ -69,9 +69,9 @@ runs:
         path: ${{ inputs.renku-path }}
         ref: ${{ inputs.renku-reference }}
     - uses: actions/setup-node@v4
-      name: Setup Node LTS
+      name: Setup Node v20
       with:
-        node-version: lts/*
+        node-version: 20
         cache: npm
         cache-dependency-path: ${{ inputs.settings-working-directory }}
     - uses: cypress-io/github-action@v6
