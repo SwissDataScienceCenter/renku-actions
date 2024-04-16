@@ -30,6 +30,7 @@ components = [
     "renku-ui",
     "renku-data-services",
     "amalthea",
+    "secrets-storage",
 ]
 
 
@@ -83,12 +84,16 @@ class RenkuRequirement(object):
     def repo(self):
         if self.component == "renku-core":
             return "renku-python"
+        if self.component == "secrets-storage":
+            return "renku-data-services"
         return self.component
 
     @property
     def repo_url(self):
         if self.component == "renku-core":
             return f"https://github.com/SwissDataScienceCenter/renku-python.git"
+        if self.component == "secrets-storage":
+            return f"https://github.com/SwissDataScienceCenter/renku-data-services.git"
         return f"https://github.com/SwissDataScienceCenter/{self.component}.git"
 
     @property
