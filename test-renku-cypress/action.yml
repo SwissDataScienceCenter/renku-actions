@@ -68,13 +68,13 @@ runs:
         repository: ${{ inputs.renku-repository }}
         path: ${{ inputs.renku-path }}
         ref: ${{ inputs.renku-reference }}
-    - uses: actions/setup-node@v3
-      name: Setup Node v18
+    - uses: actions/setup-node@v4
+      name: Setup Node v20
       with:
-        node-version: 18
+        node-version: 20
         cache: npm
         cache-dependency-path: ${{ inputs.settings-working-directory }}
-    - uses: cypress-io/github-action@v5
+    - uses: cypress-io/github-action@v6
       name: "Verify infrastructure and run the target Cypress test"
       id: cypress-acceptance-tests
       env:
