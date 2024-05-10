@@ -19,18 +19,20 @@ jobs:
             ref: master
           - name: SwissDataScienceCenter/renku-graph
             ref: development
+          - name: SwissDataScienceCenter/renku-data-services
+            ref: main
     runs-on: ubuntu-latest
     steps:
       - name: Get release tag
         run: echo "NEW_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Checkout repo to be updated
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ matrix.repo.name }}
           ref: ${{ matrix.repo.ref }}
           fetch-depth: 1
       - name: Checkout renku-actions repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           path: .actions-repo
