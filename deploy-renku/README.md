@@ -41,6 +41,7 @@ deploy-pr:
       renku_notebooks: "${{ needs.check-deploy.outputs.renku-notebooks }}"
       renku_ui: "${{ needs.check-deploy.outputs.renku-ui }}"
       renku_data_services: "${{ needs.check-deploy.outputs.renku-data-services }}"
+      renku_search: "${{ needs.check-deploy.outputs.renku-search }}"
       extra_values: "${{ needs.check-deploy.outputs.extra-values }}"
 ```
 
