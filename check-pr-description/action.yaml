@@ -35,6 +35,9 @@ outputs:
   amalthea:
     description: amalthea reference as specified in the command string
     value: ${{ steps.check-string.outputs.amalthea}}
+  amalthea-sessions:
+    description: reference to the new amalthea operator helm chart
+    value: ${{ steps.check-string.outputs.amalthea-sessions}}
   extra-values:
     description: "extra values passed to helm; separate multiple values with commas: key1=val1,key2=val2"
     value: ${{ steps.check-string.outputs.extra-values }}
@@ -80,6 +83,11 @@ runs:
             if [[ $command =~ $match ]]; then
               echo "renku-notebooks reference: ${BASH_REMATCH[1]}"
               echo "renku-notebooks=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
+            fi
+            match="amalthea-sessions=(\S*)"
+            if [[ $command =~ $match ]]; then
+              echo "amalthea-sessions reference: ${BASH_REMATCH[1]}"
+              echo "amalthea-sessions=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
             match="amalthea=(\S*)"
             if [[ $command =~ $match ]]; then
