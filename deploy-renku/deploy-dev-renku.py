@@ -89,7 +89,9 @@ class RenkuRequirement(object):
     @property
     def repo_url(self):
         if self.component == "renku-core":
-            return f"https://github.com/SwissDataScienceCenter/renku-python.git"
+            return "https://github.com/SwissDataScienceCenter/renku-python.git"
+        if self.component == "amalthea-sessions":
+            return "https://github.com/SwissDataScienceCenter/amalthea.git"
         return f"https://github.com/SwissDataScienceCenter/{self.component}.git"
 
     @property
