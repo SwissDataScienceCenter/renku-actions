@@ -41,6 +41,8 @@ deploy-pr:
       renku_notebooks: "${{ needs.check-deploy.outputs.renku-notebooks }}"
       renku_ui: "${{ needs.check-deploy.outputs.renku-ui }}"
       renku_data_services: "${{ needs.check-deploy.outputs.renku-data-services }}"
+      amalthea: "${{ needs.check-deploy.outputs.amalthea }}"
+      amalthea_sessions: "${{ needs.check-deploy.outputs.amalthea-sessions }}"
       secrets_storage: "${{ needs.check-deploy.outputs.secrets-storage}}"
       renku_search: "${{ needs.check-deploy.outputs.renku-search }}"
       extra_values: "${{ needs.check-deploy.outputs.extra-values }}"

@@ -31,6 +31,7 @@ components = [
     "renku-data-services",
     "renku-search",
     "amalthea",
+    "amalthea-sessions",
     "secrets-storage",
 ]
 
@@ -92,7 +93,9 @@ class RenkuRequirement(object):
     @property
     def repo_url(self):
         if self.component == "renku-core":
-            return f"https://github.com/SwissDataScienceCenter/renku-python.git"
+            return "https://github.com/SwissDataScienceCenter/renku-python.git"
+        if self.component == "amalthea-sessions":
+            return "https://github.com/SwissDataScienceCenter/amalthea.git"
         if self.component == "secrets-storage":
             return f"https://github.com/SwissDataScienceCenter/renku-data-services.git"
         return f"https://github.com/SwissDataScienceCenter/{self.component}.git"
@@ -151,6 +154,17 @@ def configure_component_versions(component_versions: dict, values_file: Path) ->
                 req.setup()
                 patches[component] = req.update_values(values_file)
             if component == "amalthea":
+                reqs_path = tempdir / "renku" / "helm-chart/renku/requirements.yaml"
+                with open(reqs_path) as f:
+                    reqs = yaml.load(f, Loader=yaml.SafeLoader)
+                for dep in reqs["dependencies"]:
+                    if dep["name"] == component.replace("_", "-"):
+                        dep["version"] = req.version
+                        dep["repository"] = req.helm_repo
+                        continue
+                with open(reqs_path, "w") as f:
+                    yaml.dump(reqs, f)
+            if component == "amalthea-sessions":
                 reqs_path = tempdir / "renku" / "helm-chart/renku/requirements.yaml"
                 with open(reqs_path) as f:
                     reqs = yaml.load(f, Loader=yaml.SafeLoader)
