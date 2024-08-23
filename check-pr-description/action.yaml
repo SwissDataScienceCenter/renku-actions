@@ -35,6 +35,9 @@ outputs:
   secrets-storage:
     description: secrets-storage reference as specified in the command string
     value: ${{ steps.check-string.outputs.secrets-storage }}
+  renku-search:
+    description: renku-search reference as specified in the command string
+    value: ${{ steps.check-string.outputs.renku-search }}
   amalthea:
     description: amalthea reference as specified in the command string
     value: ${{ steps.check-string.outputs.amalthea}}
@@ -103,6 +106,10 @@ runs:
             if [[ $command =~ $match ]]; then
               echo "secrets-storage reference: ${BASH_REMATCH[1]}"
               echo "secrets-storage=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
+            match="renku-search=(\S*)"
+            if [[ $command =~ $match ]]; then
+              echo "renku-search reference: ${BASH_REMATCH[1]}"
+              echo "renku-search=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
             match="#notest"
             if [[ $command =~ $match ]]; then
