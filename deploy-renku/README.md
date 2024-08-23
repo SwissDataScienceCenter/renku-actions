@@ -42,7 +42,7 @@ deploy-pr:
       renku_ui: "${{ needs.check-deploy.outputs.renku-ui }}"
       renku_data_services: "${{ needs.check-deploy.outputs.renku-data-services }}"
       amalthea: "${{ needs.check-deploy.outputs.amalthea }}"
-      amalthea-sessions: "${{ needs.check-deploy.outputs.amalthea-sessions }}"
+      amalthea_sessions: "${{ needs.check-deploy.outputs.amalthea-sessions }}"
       extra_values: "${{ needs.check-deploy.outputs.extra-values }}"
 ```
 
