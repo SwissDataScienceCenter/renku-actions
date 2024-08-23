@@ -32,6 +32,9 @@ outputs:
   renku-data-services:
     description: renku-data-services reference as specified in the command string
     value: ${{ steps.check-string.outputs.renku-data-services }}
+  renku-search:
+    description: renku-search reference as specified in the command string
+    value: ${{ steps.check-string.outputs.renku-search }}
   amalthea:
     description: amalthea reference as specified in the command string
     value: ${{ steps.check-string.outputs.amalthea}}
@@ -103,6 +106,11 @@ runs:
             if [[ $command =~ $match ]]; then
               echo "renku-data-services reference: ${BASH_REMATCH[1]}"
               echo "renku-data-services=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
+            fi
+            match="renku-search=(\S*)"
+            if [[ $command =~ $match ]]; then
+              echo "renku-search reference: ${BASH_REMATCH[1]}"
+              echo "renku-search=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
             match="#notest"
             if [[ $command =~ $match ]]; then

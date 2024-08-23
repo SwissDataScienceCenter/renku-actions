@@ -29,6 +29,7 @@ components = [
     "renku-notebooks",
     "renku-ui",
     "renku-data-services",
+    "renku-search",
     "amalthea",
     "amalthea-sessions",
 ]
