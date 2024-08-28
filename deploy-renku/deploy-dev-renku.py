@@ -161,10 +161,9 @@ def configure_component_versions(component_versions: dict, values_file: Path) ->
                     if dep["name"] == component.replace("_", "-"):
                         dep["version"] = req.version
                         dep["repository"] = req.helm_repo
-                        continue
                 with open(reqs_path, "w") as f:
                     yaml.dump(reqs, f)
-            if component == "amalthea-sessions":
+            if component == "amalthea_sessions":
                 reqs_path = tempdir / "renku" / "helm-chart/renku/requirements.yaml"
                 with open(reqs_path) as f:
                     reqs = yaml.load(f, Loader=yaml.SafeLoader)
@@ -172,7 +171,6 @@ def configure_component_versions(component_versions: dict, values_file: Path) ->
                     if dep["name"] == component.replace("_", "-"):
                         dep["version"] = req.version
                         dep["repository"] = req.helm_repo
-                        continue
                 with open(reqs_path, "w") as f:
                     yaml.dump(reqs, f)
     return patches
