@@ -21,3 +21,8 @@ git config --global --add safe.directory $PWD
 # build and push the chart and images
 cd $CHARTPRESS_SPEC_DIR
 chartpress --push $CHART_TAG $IMAGE_PREFIX
+
+if [ ! -z "$PUSH_LATEST" ]; then
+    echo "Pushing images with 'latest' tags"
+    chartpress --push --tag latest $IMAGE_PREFIX
+fi

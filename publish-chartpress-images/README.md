@@ -29,3 +29,7 @@ You can set these environment variables:
 | DOCKER_USERNAME      | None        | Yes      |
 | IMAGE_PREFIX         | None        | No       |
 | CHARTPRESS_SPEC_DIR  | .           | No       |
+| PUSH_LATEST          | None        | No       |
+
+Note: setting the `PUSH_LATEST` variable to any non-zero value will trigger the publishing of
+the images with the `latest` tag.
