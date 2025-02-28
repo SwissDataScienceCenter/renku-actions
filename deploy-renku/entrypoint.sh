@@ -4,7 +4,9 @@ set -e
 RENKU_NAMESPACE=${RENKU_NAMESPACE:-$RENKU_RELEASE}
 
 # set GitLab URL
-GITLAB_URL="https://gitlab.dev.renku.ch"
+export GITLAB_URL="https://gitlab.dev.renku.ch"
+export REGISTRY_FQDN="registry.dev.renku.ch"
+export TLS_SECRET_NAME="${RENKU_RELEASE}-ch-tls"
 
 # set up docker credentials
 echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
@@ -12,8 +14,18 @@ echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 # set up kube context and values file
 echo "$RENKUBOT_KUBECONFIG" > "$KUBECONFIG" && chmod 400 "$KUBECONFIG"
 
-# set up the values file
-printf "%s" "$RENKU_VALUES" | sed "s/<replace>/${RENKU_RELEASE}/" > $RENKU_VALUES_FILE
+cp $RENKU_VALUES $RENKU_VALUES_FILE
+
+# Set the FQDN in the values file
+export FQDN="${RENKU_RELEASE}.dev.renku.ch"
+yq eval ".amalthea.deployCrd = false" -i $RENKU_VALUES_FILE
+yq eval ".amalthea-sessions.deployCrd = false" -i $RENKU_VALUES_FILE
+yq eval '.global.renku.domain = strenv(FQDN)' -i $RENKU_VALUES_FILE
+yq eval '.ingress.hosts[0] = strenv(FQDN)' -i $RENKU_VALUES_FILE
+yq eval '.ingress.tls[0].hosts[0] = strenv(FQDN)' -i $RENKU_VALUES_FILE
+yq eval '.ingress.tls[0].secretName = strenv(TLS_SECRET_NAME)' -i $RENKU_VALUES_FILE
+yq eval '.global.gitlab.url = strenv(GITLAB_URL)' -i $RENKU_VALUES_FILE
+yq eval '.global.gitlab.registry.host = strenv(REGISTRY_FQDN)' -i $RENKU_VALUES_FILE
 
 # register the GitLab app
 if test -n "$GITLAB_TOKEN" ; then
@@ -22,12 +34,12 @@ if test -n "$GITLAB_TOKEN" ; then
                         --data "name=${RENKU_RELEASE}" \
                         --data "redirect_uri=https://${RENKU_RELEASE}.dev.renku.ch/auth/realms/Renku/broker/dev-renku/endpoint https://${RENKU_RELEASE}.dev.renku.ch/api/auth/gitlab/token https://${RENKU_RELEASE}.dev.renku.ch/api/auth/callback" \
                         --data "scopes=api read_user read_repository read_registry openid")
-  APP_ID=$(echo $gitlab_app | jq -r '.application_id')
-  APP_SECRET=$(echo $gitlab_app | jq -r '.secret')
+  export APP_ID=$(echo $gitlab_app | jq -r '.application_id')
+  export APP_SECRET=$(echo $gitlab_app | jq -r '.secret')
 
   # gateway gitlab app/secret
-  yq w -i $RENKU_VALUES_FILE "gateway.gitlabClientId" "$APP_ID"
-  yq w -i $RENKU_VALUES_FILE "gateway.gitlabClientSecret" "$APP_SECRET"
+  yq eval '.gateway.gitlabClientId = strenv(APP_ID)' -i $RENKU_VALUES_FILE
+  yq eval '.gateway.gitlabClientSecret = strenv(APP_SECRET)' -i $RENKU_VALUES_FILE
 fi
 
 # create namespace and ignore error in case it already exists
