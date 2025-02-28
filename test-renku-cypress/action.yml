@@ -62,22 +62,22 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v4
-      name: "Checkout the Renku repository"
+    - name: "Checkout Renku repository"
+      uses: actions/checkout@v4
       with:
         repository: ${{ inputs.renku-repository }}
         path: ${{ inputs.renku-path }}
         ref: ${{ inputs.renku-reference }}
 
-    - uses: actions/setup-node@v4
-      name: Setup Node v22
+    - name: Setup Node v22
+      uses: actions/setup-node@v4
       with:
         node-version: 22
         cache: npm
         cache-dependency-path: ${{ inputs.settings-working-directory }}
 
-    - uses: cypress-io/github-action@v6
-      name: "Verify infrastructure and run the target Cypress test"
+    - name: "Run target Cypress test"
+      uses: cypress-io/github-action@v6
       id: cypress-acceptance-tests
       env:
         BASE_URL: https://${{ inputs.renku-release }}.dev.renku.ch
@@ -93,16 +93,26 @@ runs:
           ${{ inputs.e2e-folder }}${{ inputs.e2e-target }}${{ inputs.e2e-suffix }}
         working-directory: ${{ inputs.settings-working-directory }}
 
-    - uses: actions/upload-artifact@v4
+    - name: Create artifact file name
+      id: sanitize
       if: failure()
+      shell: bash
+      run: echo "sanitized=$(echo '${{ inputs.e2e-target }}' | sed 's/[\/]/_/g')" >> $GITHUB_OUTPUT
+
+    - name: Upload Cypress screenshot
+      if: failure()
+      id: upload-screenshort
+      uses: actions/upload-artifact@v4
       with:
-        name: Cypress screenshot - ${{ replace(inputs.e2e-target, '/', '_') }} - ${{ github.run_id }}
+        name: Cypress screenshot - ${{ steps.sanitize.outputs.sanitized }} - ${{ github.run_id }}
         path: ${{ inputs.settings-working-directory }}/cypress/screenshots
         retention-days: 7
 
-    - uses: actions/upload-artifact@v4
+    - name: Upload Cypress video
+      id: upload-video
       if: failure()
+      uses: actions/upload-artifact@v4
       with:
-        name: Cypress video - ${{ replace(inputs.e2e-target, '/', '_') }} - ${{ github.run_id }}
+        name: Cypress video - ${{ steps.sanitize.outputs.sanitized }} - ${{ github.run_id }}
         path: ${{ inputs.settings-working-directory }}/cypress/videos
         retention-days: 3
