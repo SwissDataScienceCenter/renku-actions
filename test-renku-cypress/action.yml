@@ -96,13 +96,13 @@ runs:
     - uses: actions/upload-artifact@v4
       if: failure()
       with:
-        name: Cypress screenshot - ${{ inputs.e2e-target }}
+        name: Cypress screenshot - ${{ replace(inputs.e2e-target, '/', '_') }} - ${{ github.run_id }}
         path: ${{ inputs.settings-working-directory }}/cypress/screenshots
         retention-days: 7
 
     - uses: actions/upload-artifact@v4
       if: failure()
       with:
-        name: Cypress video - ${{ inputs.e2e-target }}
+        name: Cypress video - ${{ replace(inputs.e2e-target, '/', '_') }} - ${{ github.run_id }}
         path: ${{ inputs.settings-working-directory }}/cypress/videos
         retention-days: 3
