@@ -1,5 +1,5 @@
 name: "test-renku"
-description: "Run the acceptance tests for a Renku CI deployment"
+description: "Run the legacy Scala/Selenium acceptance tests for a Renku CI deployment"
 inputs:
   kubeconfig:
     description: "The contents of the kubeconfig file to be used for helm/kubectl commands."
