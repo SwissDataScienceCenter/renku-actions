@@ -75,7 +75,7 @@ runs:
         echo "Looking for tests matching '${{ inputs.e2e-target }}'"
         match=$(find "${{ inputs.settings-working-directory }}/${{ inputs.e2e-folder }}" -type f -maxdepth 1 -name "${{ inputs.e2e-target }}${{ inputs.e2e-suffix }}" | wc -l)
         if [ "$match" -eq "0" ]; then
-          echo "No test files found for e2e target: ${{ inputs.e2e-target }}"
+          echo "::error::No test files found for e2e target: ${{ inputs.e2e-target }}"
           exit 1
         fi
 
