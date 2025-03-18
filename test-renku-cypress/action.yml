@@ -73,7 +73,7 @@ runs:
       shell: bash
       run: |
         echo "Looking for tests matching '${{ inputs.e2e-target }}'"
-        match=$(find "${{ inputs.e2e-folder }}" -type f -name "${{ inputs.e2e-target }}${{ inputs.e2e-suffix }}" | wc -l)
+        match=$(find "${{ inputs.settings-working-directory }}/${{ inputs.e2e-folder }}" -type f -name "${{ inputs.e2e-target }}${{ inputs.e2e-suffix }}" | wc -l)
         if [ "$match" -eq "0" ]; then
           echo "No test files found for e2e target: ${{ inputs.e2e-target }}"
           exit 1
