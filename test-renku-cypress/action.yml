@@ -87,8 +87,9 @@ runs:
         cache-dependency-path: ${{ inputs.settings-working-directory }}
 
     - name: Run target Cypress test
-      uses: cypress-io/github-action@v6
       id: cypress-acceptance-tests
+      continue-on-error: true
+      uses: cypress-io/github-action@v6
       env:
         BASE_URL: https://${{ inputs.renku-release }}.dev.renku.ch
         TEST_EMAIL: ${{ inputs.test-user-email }}
@@ -105,13 +106,13 @@ runs:
 
     - name: Create artifact file name
       id: sanitize
-      if: failure()
+      if: steps.cypress-acceptance-tests.outcome == 'failure'
       shell: bash
       run: echo "sanitized=$(echo '${{ inputs.e2e-target }}' | sed 's/[\/]/_/g')" >> $GITHUB_OUTPUT
 
     - name: Upload Cypress screenshot
-      if: failure()
       id: upload-screenshort
+      if: steps.cypress-acceptance-tests.outcome == 'failure' && steps.sanitize.outcome == 'success'
       uses: actions/upload-artifact@v4
       with:
         name: Cypress screenshot - ${{ steps.sanitize.outputs.sanitized }} - ${{ github.run_id }}
@@ -120,7 +121,7 @@ runs:
 
     - name: Upload Cypress video
       id: upload-video
-      if: failure()
+      if: steps.cypress-acceptance-tests.outcome == 'failure' && steps.sanitize.outcome == 'success'
       uses: actions/upload-artifact@v4
       with:
         name: Cypress video - ${{ steps.sanitize.outputs.sanitized }} - ${{ github.run_id }}
