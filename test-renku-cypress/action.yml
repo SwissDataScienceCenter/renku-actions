@@ -62,12 +62,22 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: "Checkout Renku repository"
+    - name: Checkout Renku repository
       uses: actions/checkout@v4
       with:
         repository: ${{ inputs.renku-repository }}
         path: ${{ inputs.renku-path }}
         ref: ${{ inputs.renku-reference }}
+
+    - name: Check e2e target spec exists
+      shell: bash
+      run: |
+        echo "Looking for tests matching '${{ inputs.e2e-target }}'"
+        match=$(find "${{ inputs.settings-working-directory }}/${{ inputs.e2e-folder }}" -type f -maxdepth 1 -name "${{ inputs.e2e-target }}${{ inputs.e2e-suffix }}" | wc -l)
+        if [ "$match" -eq "0" ]; then
+          echo "::error::No test files found for e2e target: ${{ inputs.e2e-target }}"
+          exit 1
+        fi
 
     - name: Setup Node v22
       uses: actions/setup-node@v4
@@ -76,9 +86,10 @@ runs:
         cache: npm
         cache-dependency-path: ${{ inputs.settings-working-directory }}
 
-    - name: "Run target Cypress test"
-      uses: cypress-io/github-action@v6
+    - name: Run target Cypress test
       id: cypress-acceptance-tests
+      continue-on-error: true
+      uses: cypress-io/github-action@v6
       env:
         BASE_URL: https://${{ inputs.renku-release }}.dev.renku.ch
         TEST_EMAIL: ${{ inputs.test-user-email }}
@@ -95,13 +106,13 @@ runs:
 
     - name: Create artifact file name
       id: sanitize
-      if: failure()
+      if: steps.cypress-acceptance-tests.outcome == 'failure'
       shell: bash
       run: echo "sanitized=$(echo '${{ inputs.e2e-target }}' | sed 's/[\/]/_/g')" >> $GITHUB_OUTPUT
 
     - name: Upload Cypress screenshot
-      if: failure()
       id: upload-screenshort
+      if: steps.cypress-acceptance-tests.outcome == 'failure' && steps.sanitize.outcome == 'success'
       uses: actions/upload-artifact@v4
       with:
         name: Cypress screenshot - ${{ steps.sanitize.outputs.sanitized }} - ${{ github.run_id }}
@@ -110,7 +121,7 @@ runs:
 
     - name: Upload Cypress video
       id: upload-video
-      if: failure()
+      if: steps.cypress-acceptance-tests.outcome == 'failure' && steps.sanitize.outcome == 'success'
       uses: actions/upload-artifact@v4
       with:
         name: Cypress video - ${{ steps.sanitize.outputs.sanitized }} - ${{ github.run_id }}

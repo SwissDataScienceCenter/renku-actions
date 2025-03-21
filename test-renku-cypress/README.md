@@ -14,7 +14,6 @@ Mind that you need to provide the e2e file name; the action is structured to run
 ```yaml
     strategy:
       fail-fast: false
-      max-parallel: 1
       matrix:
         tests: [publicProject, updateProjects, useSession]
 ```
@@ -26,7 +25,6 @@ jobs:
   cypress-acceptance-tests:
     strategy:
       fail-fast: false
-      max-parallel: 1
       matrix:
         tests:
           - publicProject
