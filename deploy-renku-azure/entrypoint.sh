@@ -27,6 +27,9 @@ yq eval '.ingress.tls[0].secretName = strenv(TLS_SECRET_NAME)' -i $RENKU_VALUES_
 yq eval '.global.gitlab.url = strenv(GITLAB_URL)' -i $RENKU_VALUES_FILE
 yq eval '.global.gitlab.registry.host = strenv(REGISTRY_FQDN)' -i $RENKU_VALUES_FILE
 
+# Add nginx ingress annotation
+yq eval '.ingress.annotations."kubernetes.io/ingress.class" = "nginx"' -i $RENKU_VALUES_FILE
+
 # register the GitLab app
 if test -n "$GITLAB_TOKEN" ; then
   gitlab_app=$(curl -s -X POST ${GITLAB_URL}/api/v4/applications \
