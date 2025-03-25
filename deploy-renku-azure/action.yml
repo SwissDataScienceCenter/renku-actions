@@ -1,4 +1,4 @@
-name: 'deploy-renku'
+name: 'deploy-renku-azure'
 description: 'Deploy Renku'
 runs:
   using: 'docker'

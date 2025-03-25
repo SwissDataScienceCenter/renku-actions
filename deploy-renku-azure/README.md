@@ -22,7 +22,7 @@ deploy-pr:
     - uses: actions/checkout@v3
     - name: renku build and deploy
     if: needs.check-deploy.outputs.pr-contains-string == 'true'
-    uses: SwissDataScienceCenter/renku-actions/deploy-renku@v0.3.2
+    uses: SwissDataScienceCenter/renku-actions/deploy-renku-azure@v0.3.2
     env:
       DOCKER_PASSWORD: ${{ secrets.RENKU_DOCKER_PASSWORD }}
       DOCKER_USERNAME: ${{ secrets.RENKU_DOCKER_USERNAME }}
