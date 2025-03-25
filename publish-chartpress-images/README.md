@@ -30,6 +30,10 @@ You can set these environment variables:
 | IMAGE_PREFIX         | None        | No       |
 | CHARTPRESS_SPEC_DIR  | .           | No       |
 | PUSH_LATEST          | None        | No       |
+| PLATFORMS            | linux/amd64 | No       |
 
 Note: setting the `PUSH_LATEST` variable to any non-zero value will trigger the publishing of
 the images with the `latest` tag.
+
+Platforms can be specified as a comma-separated list of values. For example, to build images for amd64 and arm64 platforms, set `PLATFORMS` to `linux/amd64,linux/arm64`.
+
