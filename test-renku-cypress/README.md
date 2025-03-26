@@ -7,6 +7,8 @@ This is a composite action that:
 
 The test user can be specified with `inputs.test-user-*` inputs. The only mandatory field is `*-password`; you can provide also `*-email`, `*-firstname`, `*-lastname` and `*-username`.
 
+The FQDN of the Kubernetes cluster on which Renku has been deployed can be specified with `kubernetes-cluster-fqdn`. This is optional and defaults to `dev.renku.ch`.
+
 ## Running multiple tests.
 
 Mind that you need to provide the e2e file name; the action is structured to run different tests in parallel. The easiest way to do that is by defining a matrix in the workflow file, as in the example below:

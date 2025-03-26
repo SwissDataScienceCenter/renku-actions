@@ -16,6 +16,10 @@ inputs:
   e2e-target:
     description: "The target spec to execute"
     required: true
+  kubernetes-cluster-fqdn:
+    description: "The fully qualified domain name of the Kubernetes cluster."
+    required: false
+    default: "dev.renku.ch"
   renku-path:
     description: "The path to the Renku repository."
     required: false
@@ -91,7 +95,7 @@ runs:
       continue-on-error: true
       uses: cypress-io/github-action@v6
       env:
-        BASE_URL: https://${{ inputs.renku-release }}.dev.renku.ch
+        BASE_URL: https://${{ inputs.renku-release }}.${{ inputs.kubernetes-cluster-fqdn }}
         TEST_EMAIL: ${{ inputs.test-user-email }}
         TEST_FIRST_NAME: ${{ inputs.test-user-firstname }}
         TEST_LAST_NAME: ${{ inputs.test-user-lastname }}
