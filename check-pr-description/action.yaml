@@ -8,6 +8,10 @@ inputs:
     description: String to search for in the PR description
     required: false
     default: "/deploy"
+  azure_string:
+    description: String to search for Azure deployment in the PR description
+    required: false
+    default: "/AzureDeploy"
   test-enabled-default:
     description: Default value for test-enabled
     required: false
@@ -28,6 +32,12 @@ outputs:
   pr-contains-string:
     description: true/false whether the PR description contains the string
     value: ${{ steps.check-string.outputs.pr-contains-string }}
+  pr-contains-azure-string:
+    description: true/false whether the PR description contains the Azure string
+    value: ${{ steps.check-string.outputs.pr-contains-azure-string }}
+  deployment-type:
+    description: Type of deployment (standard or azure)
+    value: ${{ steps.check-string.outputs.deployment-type }}
   renku:
     description: renku reference as specified in the command string
     value: ${{ steps.check-string.outputs.renku }}
@@ -77,9 +87,18 @@ runs:
       run: |
         echo "Target PR: https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ inputs.pr_ref }}"
         pr_text=$(curl -s https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ inputs.pr_ref }} | jq '.body')
+
+        # Check for standard deployment command
         pr_contains_string=$(echo $pr_text | jq 'test("${{ inputs.string }}")' || echo "false")
         echo "pr-contains-string=$pr_contains_string" >> $GITHUB_OUTPUT
-        echo "String found: $pr_contains_string"
+        echo "Standard deployment string found: $pr_contains_string"
+
+        # Check for Azure deployment command
+        pr_contains_azure_string=$(echo $pr_text | jq 'test("${{ inputs.azure_string }}")' || echo "false")
+        echo "pr-contains-azure-string=$pr_contains_azure_string" >> $GITHUB_OUTPUT
+        echo "Azure deployment string found: $pr_contains_azure_string"
+
+        # Set default test values
         if [ "${{ inputs.test-enabled-default }}" = "true" ]; then
           test_enabled=true
         else
@@ -90,65 +109,101 @@ runs:
         else
           test_legacy_enabled=false
         fi
+
+        # Process standard deployment command
         if [ "$pr_contains_string" = true ] ; then
+          echo "deployment-type=standard" >> $GITHUB_OUTPUT
           command=$(echo $pr_text | jq -r 'split("${{ inputs.string }} ") | last | split("\r\n") | first')
-          if [[ $command != *"${{ inputs.string }}"* ]]; then
+          process_command "$command" "${{ inputs.string }}"
+        # Process Azure deployment command
+        elif [ "$pr_contains_azure_string" = true ] ; then
+          echo "deployment-type=azure" >> $GITHUB_OUTPUT
+          command=$(echo $pr_text | jq -r 'split("${{ inputs.azure_string }} ") | last | split("\r\n") | first')
+          process_command "$command" "${{ inputs.azure_string }}"
+        else
+          echo "No deployment command found"
+          echo "deployment-type=none" >> $GITHUB_OUTPUT
+        fi
+
+        echo "Test enabled: $test_enabled"
+        echo "test-enabled=${test_enabled}" >> $GITHUB_OUTPUT
+        echo "Legacy tests enabled: $test_legacy_enabled"
+        echo "test-legacy-enabled=${test_legacy_enabled}" >> $GITHUB_OUTPUT
+
+        # Function to process command parameters
+        function process_command() {
+          local command="$1"
+          local command_string="$2"
+
+          if [[ $command != *"$command_string"* ]]; then
             echo "Command found: $command"
+
             match="renku=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku reference: ${BASH_REMATCH[1]}"
               echo "renku=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
+
             match="renku-core=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku-core reference: ${BASH_REMATCH[1]}"
               echo "renku-core=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
+
             match="renku-gateway=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku-gateway reference: ${BASH_REMATCH[1]}"
               echo "renku-gateway=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
+
             match="renku-graph=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku-graph reference: ${BASH_REMATCH[1]}"
               echo "renku-graph=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
+
             match="renku-notebooks=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku-notebooks reference: ${BASH_REMATCH[1]}"
               echo "renku-notebooks=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
+
             match="amalthea-sessions=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "amalthea-sessions reference: ${BASH_REMATCH[1]}"
               echo "amalthea-sessions=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
+
             match="amalthea=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "amalthea reference: ${BASH_REMATCH[1]}"
               echo "amalthea=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
+
             match="renku-ui=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku-ui reference: ${BASH_REMATCH[1]}"
               echo "renku-ui=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
+
             match="renku-data-services=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku-data-services reference: ${BASH_REMATCH[1]}"
               echo "renku-data-services=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
+
             match="secrets-storage=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "secrets-storage reference: ${BASH_REMATCH[1]}"
               echo "secrets-storage=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
+
             match="renku-search=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku-search reference: ${BASH_REMATCH[1]}"
               echo "renku-search=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
+
             match="${{ inputs.test-enabled-switch-string }}"
             if [[ $command =~ $match ]]; then
               if [ "$test_enabled" = true ]; then
@@ -157,6 +212,7 @@ runs:
                 test_enabled=true
               fi
             fi
+
             match="${{ inputs.test-legacy-enabled-switch-string }}"
             if [[ $command =~ $match ]]; then
               if [ "$test_legacy_enabled" = true ]; then
@@ -165,6 +221,7 @@ runs:
                 test_legacy_enabled=true
               fi
             fi
+
             match="extra-values=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "extra values: ${BASH_REMATCH[1]}"
@@ -173,10 +230,5 @@ runs:
           else
             echo "No command found"
           fi
-        fi
-        echo "Test enabled: $test_enabled"
-        echo "test-enabled=${test_enabled}" >> $GITHUB_OUTPUT
-        echo "Legacy tests enabled: $test_legacy_enabled"
-        echo "test-legacy-enabled=${test_legacy_enabled}" >> $GITHUB_OUTPUT
-        
+        }
       shell: bash
