@@ -1,0 +1,121 @@
+package main
+
+import (
+	"context"
+	//"encoding/json"
+	"log"
+	"regexp"
+
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+)
+
+func k8sClient(kubeconfig string) (*kubernetes.Clientset, error) {
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	if err != nil {
+		return nil, err
+	}
+	clientset, err := kubernetes.NewForConfig(config)
+	return clientset, err
+}
+
+func getNamespaces(ctx context.Context, clnt *kubernetes.Clientset, regexs ...*regexp.Regexp) ([]v1.Namespace, error) {
+	namespaces, err := clnt.CoreV1().Namespaces().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	output := []v1.Namespace{}
+	if len(regexs) == 0 {
+		return namespaces.Items, nil
+	}
+	for _, ns := range namespaces.Items {
+		for _, regex := range regexs {
+			if !regex.MatchString(ns.Name) {
+				continue
+			}
+			log.Printf("Namespace %s MATCHED regex %s", ns.Name, regex)
+			output = append(output, ns)
+		}
+	}
+	return output, nil
+}
+
+type NamespacedNameSet map[types.NamespacedName]struct{}
+
+func (n NamespacedNameSet) Values() []types.NamespacedName {
+	output := []types.NamespacedName{}
+	for k, _ := range n {
+		output = append(output, k)
+	}
+	return output
+}
+
+func getReleases(ctx context.Context, clnt *kubernetes.Clientset, regexs ...*regexp.Regexp) ([]types.NamespacedName, error) {
+	namespaces, err := getNamespaces(ctx, clnt)
+	if err != nil {
+		return nil, err
+	}
+	output := NamespacedNameSet(map[types.NamespacedName]struct{}{})
+	for _, ns := range namespaces {
+		releases, err := clnt.CoreV1().Secrets(ns.GetName()).List(ctx, metav1.ListOptions{FieldSelector: "type=helm.sh/release.v1"})
+		if err != nil {
+			return nil, err
+		}
+		for _, release := range releases.Items {
+			name := release.GetLabels()["name"]
+			nsn := types.NamespacedName{Namespace: ns.GetName(), Name: name}
+			if _, found := output[nsn]; found {
+				continue
+			}
+			if len(regexs) == 0 {
+				output[nsn] = struct{}{}
+				continue
+			}
+			for _, regex := range regexs {
+				if len(name) > 0 && !regex.MatchString(name) {
+					continue
+				}
+				log.Printf("Release %s MATCHED regex %s", name, regex)
+				output[nsn] = struct{}{}
+			}
+		}
+	}
+	return output.Values(), nil
+}
+
+func getDynClient(kubeconfig string) (*dynamic.DynamicClient, error) {
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	if err != nil {
+		return nil, err
+	}
+	dynClient, err := dynamic.NewForConfig(config)
+	return dynClient, err
+}
+
+func removeFinalizers(ctx context.Context, clnt dynamic.ResourceInterface) error {
+	// List the CRD objects in a specific namespace (or use "" for all namespaces)
+	objects, err := clnt.List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	// patch, err := json.Marshal([]map[string]string{
+	// 	{"op": "remove", "path": "/metadata/finalizers"},
+	// })
+	if err != nil {
+		return err
+	}
+	for _, obj := range objects.Items {
+		log.Printf("patching %s in namespace %s of kind %s", obj.GetName(), obj.GetNamespace(), obj.GetKind())
+		// _, err := clnt.Patch(ctx, obj.GetName(), types.JSONPatchType, patch, metav1.PatchOptions{})
+		// if err != nil {
+		// 	return err
+		// }
+	}
+	return nil
+}
