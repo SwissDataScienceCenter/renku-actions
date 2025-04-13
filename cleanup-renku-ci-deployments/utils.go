@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	//"encoding/json"
+
+	"encoding/json"
 	"log"
 	"regexp"
 
@@ -11,7 +12,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/utils/ptr"
 )
 
 func k8sClient(kubeconfig string) (*kubernetes.Clientset, error) {
@@ -104,18 +107,47 @@ func removeFinalizers(ctx context.Context, clnt dynamic.ResourceInterface) error
 		return err
 	}
 
-	// patch, err := json.Marshal([]map[string]string{
-	// 	{"op": "remove", "path": "/metadata/finalizers"},
-	// })
+	patch, err := json.Marshal([]map[string]string{
+		{"op": "remove", "path": "/metadata/finalizers"},
+	})
 	if err != nil {
 		return err
 	}
 	for _, obj := range objects.Items {
 		log.Printf("patching %s in namespace %s of kind %s", obj.GetName(), obj.GetNamespace(), obj.GetKind())
-		// _, err := clnt.Patch(ctx, obj.GetName(), types.JSONPatchType, patch, metav1.PatchOptions{})
-		// if err != nil {
-		// 	return err
-		// }
+		_, err := clnt.Patch(ctx, obj.GetName(), types.JSONPatchType, patch, metav1.PatchOptions{})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func removeFinalizersAndNamespace(
+	ctx context.Context,
+	namespace string,
+	nsClnt typedcorev1.NamespaceInterface,
+	jsClnt dynamic.NamespaceableResourceInterface,
+	asClnt dynamic.NamespaceableResourceInterface,
+) error {
+	delOptions := metav1.DeleteOptions{
+		GracePeriodSeconds: ptr.To(int64(0)),
+		PropagationPolicy:  ptr.To(metav1.DeletePropagationForeground),
+	}
+	err := removeFinalizers(ctx, jsClnt.Namespace(namespace))
+	if err != nil {
+		log.Printf("Cannot remove JypyterServer finalizers because of error %s, skipping", err.Error())
+		return err
+	}
+	err = removeFinalizers(ctx, asClnt.Namespace(namespace))
+	if err != nil {
+		log.Printf("Cannot remove AmaltheaSession finalizers because of error %s, skipping", err.Error())
+		return err
+	}
+	err = asClnt.Delete(ctx, namespace, delOptions)
+	if err != nil {
+		log.Printf("Cannot remove AmaltheaSession finalizers because of error %s, skipping", err.Error())
+		return err
 	}
 	return nil
 }

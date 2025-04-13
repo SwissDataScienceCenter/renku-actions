@@ -8,9 +8,7 @@ import (
 	"regexp"
 
 	"github.com/alecthomas/kong"
-	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	// "k8s.io/utils/ptr"
 )
 
 type SensitiveString string
@@ -38,9 +36,26 @@ type RemoveArgs struct {
 	NamespaceRegex []string `default:"^.+-ci-.+|^ci-.+" help:"Golang regex for selecting the namespaces"`
 }
 
+func (r *RemoveArgs) Run(ctx *CmdContext) error {
+	removeReleases(ctx, r)
+	return nil
+}
+
+type GitlabApplicationCleanup struct{}
+
+func (g *GitlabApplicationCleanup) Run(ctx *CmdContext) error {
+	return cleanupGitlabApps(ctx.GitlabURL, ctx.GitlabToken, ctx.DryRun)
+}
+
 type Args struct {
-	Config `embed:""`
-	Remove RemoveArgs `cmd:"" aliases:"rm" default:"withargs"`
+	Remove                   RemoveArgs               `cmd:"" aliases:"rm" help:"Remove Renku deployments"`
+	GitlabApplicationCleanup GitlabApplicationCleanup `cmd:"gitlab_application_cleanup" aliases:"gac" help:"Remove unused gitlab apps."`
+	Config                   `embed:""`
+}
+
+type CmdContext struct {
+	ctx context.Context
+	Config
 }
 
 func main() {
@@ -48,10 +63,19 @@ func main() {
 	kctx := kong.Parse(&args)
 	log.Printf("Command: %+v", kctx.Command())
 	log.Printf("Args: %+v", args)
-	ctx := context.Background()
+	ctx := CmdContext{
+		Config: args.Config,
+		ctx:    context.Background(),
+	}
+	err := kctx.Run(&ctx)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
 
+func removeReleases(ctx *CmdContext, args *RemoveArgs) {
 	nsRegexs := []*regexp.Regexp{}
-	for _, regStr := range args.Remove.NamespaceRegex {
+	for _, regStr := range args.NamespaceRegex {
 		regex, err := regexp.CompilePOSIX(regStr)
 		if err != nil {
 			log.Fatal(err)
@@ -60,7 +84,7 @@ func main() {
 	}
 
 	relRegexs := []*regexp.Regexp{}
-	for _, regStr := range args.Remove.ReleaseRegex {
+	for _, regStr := range args.ReleaseRegex {
 		regex, err := regexp.CompilePOSIX(regStr)
 		if err != nil {
 			log.Fatal(err)
@@ -68,26 +92,23 @@ func main() {
 		relRegexs = append(relRegexs, regex)
 	}
 
-	clnt, err := k8sClient(args.Kubeconfig)
+	clnt, err := k8sClient(ctx.Kubeconfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	namespaces, err := getNamespaces(ctx, clnt, nsRegexs...)
+	namespaces, err := getNamespaces(ctx.ctx, clnt, nsRegexs...)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("Found %d namespaces", len(namespaces))
 
-	releases, err := getReleases(ctx, clnt, relRegexs...)
+	releases, err := getReleases(ctx.ctx, clnt, relRegexs...)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("Found %d releases", len(releases))
 
-	// To cleanup patch sessions to remove finalizer
-	// Patch jupyter servers to remove their finalizers
-	// Remove the namespace
 	asGVR := schema.GroupVersionResource{
 		Group:    "amalthea.dev",
 		Version:  "v1alpha1",
@@ -99,28 +120,45 @@ func main() {
 		Resource: "jupyterservers",
 	}
 
-	dynClnt, err := getDynClient(args.Kubeconfig)
+	dynClnt, err := getDynClient(ctx.Kubeconfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	asClnt := dynClnt.Resource(asGVR)
 	jsClnt := dynClnt.Resource(jsGVR)
-	// nsClnt := clnt.CoreV1().Namespaces()
-	// delOptions := metav1.DeleteOptions{
-	// 	GracePeriodSeconds: ptr.To(int64(0)),
-	// 	PropagationPolicy:  ptr.To(metav1.DeletePropagationForeground),
-	// }
+	nsClnt := clnt.CoreV1().Namespaces()
 	for _, ns := range namespaces {
 		log.Printf("Removing finalizers from sesions in namesapce %s", ns.GetName())
-		err = removeFinalizers(ctx, jsClnt.Namespace(ns.GetName()))
-		err = removeFinalizers(ctx, asClnt.Namespace(ns.GetName()))
-		// err = nsClnt.Delete(ctx, ns.GetName(), delOptions)
+		if !ctx.DryRun {
+			err := removeFinalizersAndNamespace(ctx.ctx, ns.GetName(), nsClnt, jsClnt, asClnt)
+			if err != nil {
+				continue
+			}
+		}
 	}
 	for _, release := range releases {
 		log.Printf("Removing finalizers from sesions in release %s in namesapce %s", release.Name, release.Namespace)
-		err = removeFinalizers(ctx, jsClnt.Namespace(release.Namespace))
-		err = removeFinalizers(ctx, asClnt.Namespace(release.Namespace))
-		// err = nsClnt.Delete(ctx, release.Namespace, delOptions)
+		if !ctx.DryRun {
+			err := removeFinalizersAndNamespace(ctx.ctx, release.Namespace, nsClnt, jsClnt, asClnt)
+			if err != nil {
+				continue
+			}
+		}
+	}
+	for _, release := range releases {
+		log.Printf("Removing gitlab application for release %s", release.Name)
+		app, err := findGitlabApplication(ctx.GitlabURL, ctx.GitlabToken, release.Name)
+		if err != nil {
+			log.Printf("Cannot find gitlab application for release %s because of error %s, skipping", release.Name, err.Error())
+			continue
+		}
+		if !ctx.DryRun {
+			err = removeGitlabApplication(ctx.GitlabURL, ctx.GitlabToken, app.ID)
+			if err != nil {
+				log.Printf("Cannot delete gitlab application for release %s because of error %s, skipping", release.Name, err.Error())
+				continue
+			}
+		}
 	}
 }
