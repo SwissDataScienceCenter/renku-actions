@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"encoding/json"
 	"log"
@@ -26,7 +27,7 @@ func k8sClient(kubeconfig string) (*kubernetes.Clientset, error) {
 	return clientset, err
 }
 
-func getNamespaces(ctx context.Context, clnt *kubernetes.Clientset, regexs ...*regexp.Regexp) ([]v1.Namespace, error) {
+func getNamespaces(ctx context.Context, clnt *kubernetes.Clientset, minAge time.Duration, regexs ...*regexp.Regexp) ([]v1.Namespace, error) {
 	namespaces, err := clnt.CoreV1().Namespaces().List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, err
@@ -36,12 +37,18 @@ func getNamespaces(ctx context.Context, clnt *kubernetes.Clientset, regexs ...*r
 	if len(regexs) == 0 {
 		return namespaces.Items, nil
 	}
+	now := time.Now()
 	for _, ns := range namespaces.Items {
 		for _, regex := range regexs {
+			age := now.Sub(ns.GetCreationTimestamp().Time)
+			oldEnough := age > minAge || minAge == 0
 			if !regex.MatchString(ns.Name) {
 				continue
 			}
-			log.Printf("Namespace %s MATCHED regex %s", ns.Name, regex)
+			if !oldEnough {
+				continue
+			}
+			log.Printf("Namespace %s MATCHED regex %s and is old enough %v", ns.Name, regex, age)
 			output = append(output, ns)
 		}
 	}
@@ -58,12 +65,13 @@ func (n NamespacedNameSet) Values() []types.NamespacedName {
 	return output
 }
 
-func getReleases(ctx context.Context, clnt *kubernetes.Clientset, regexs ...*regexp.Regexp) ([]types.NamespacedName, error) {
-	namespaces, err := getNamespaces(ctx, clnt)
+func getReleases(ctx context.Context, clnt *kubernetes.Clientset, minAge time.Duration, regexs ...*regexp.Regexp) ([]types.NamespacedName, error) {
+	namespaces, err := getNamespaces(ctx, clnt, minAge)
 	if err != nil {
 		return nil, err
 	}
 	output := NamespacedNameSet(map[types.NamespacedName]struct{}{})
+	now := time.Now()
 	for _, ns := range namespaces {
 		releases, err := clnt.CoreV1().Secrets(ns.GetName()).List(ctx, metav1.ListOptions{FieldSelector: "type=helm.sh/release.v1"})
 		if err != nil {
@@ -72,10 +80,12 @@ func getReleases(ctx context.Context, clnt *kubernetes.Clientset, regexs ...*reg
 		for _, release := range releases.Items {
 			name := release.GetLabels()["name"]
 			nsn := types.NamespacedName{Namespace: ns.GetName(), Name: name}
+			age := now.Sub(release.GetCreationTimestamp().Time)
+			oldEnough := age > minAge || minAge == 0
 			if _, found := output[nsn]; found {
 				continue
 			}
-			if len(regexs) == 0 {
+			if len(regexs) == 0 && oldEnough {
 				output[nsn] = struct{}{}
 				continue
 			}
@@ -83,7 +93,10 @@ func getReleases(ctx context.Context, clnt *kubernetes.Clientset, regexs ...*reg
 				if len(name) > 0 && !regex.MatchString(name) {
 					continue
 				}
-				log.Printf("Release %s MATCHED regex %s", name, regex)
+				if !oldEnough {
+					continue
+				}
+				log.Printf("Release %s MATCHED regex %s and is old enough %v", name, regex, age)
 				output[nsn] = struct{}{}
 			}
 		}

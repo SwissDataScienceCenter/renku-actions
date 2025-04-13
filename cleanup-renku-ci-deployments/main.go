@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/url"
 	"regexp"
+	"time"
 
 	"github.com/alecthomas/kong"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -32,8 +33,9 @@ type Config struct {
 }
 
 type RemoveArgs struct {
-	ReleaseRegex   []string `default:"^.+-ci-.+|^ci-.+" help:"Golang regex for selecting releases"`
-	NamespaceRegex []string `default:"^.+-ci-.+|^ci-.+" help:"Golang regex for selecting the namespaces"`
+	ReleaseRegex   []string      `default:"^.+-ci-.+|^ci-.+" help:"Golang regex for selecting releases"`
+	NamespaceRegex []string      `default:"^.+-ci-.+|^ci-.+" help:"Golang regex for selecting the namespaces"`
+	MinAge         time.Duration `default:"168h" help:"The minimum age used to delete releases, time.ParseDuration used to parse, if set to zero then all ages are deleted"`
 }
 
 func (r *RemoveArgs) Run(ctx *CmdContext) error {
@@ -97,13 +99,13 @@ func removeReleases(ctx *CmdContext, args *RemoveArgs) {
 		log.Fatal(err)
 	}
 
-	namespaces, err := getNamespaces(ctx.ctx, clnt, nsRegexs...)
+	namespaces, err := getNamespaces(ctx.ctx, clnt, args.MinAge, nsRegexs...)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("Found %d namespaces", len(namespaces))
 
-	releases, err := getReleases(ctx.ctx, clnt, relRegexs...)
+	releases, err := getReleases(ctx.ctx, clnt, args.MinAge, relRegexs...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -136,6 +138,8 @@ func removeReleases(ctx *CmdContext, args *RemoveArgs) {
 				continue
 			}
 		}
+		log.Printf("Removing gitlab application for namespace %s", ns.Name)
+		findAndRemoveGitlabApplication(ctx.GitlabURL, ctx.GitlabToken, ns.Name, ctx.DryRun)
 	}
 	for _, release := range releases {
 		log.Printf("Removing finalizers from sesions in release %s in namesapce %s", release.Name, release.Namespace)
@@ -145,20 +149,7 @@ func removeReleases(ctx *CmdContext, args *RemoveArgs) {
 				continue
 			}
 		}
-	}
-	for _, release := range releases {
 		log.Printf("Removing gitlab application for release %s", release.Name)
-		app, err := findGitlabApplication(ctx.GitlabURL, ctx.GitlabToken, release.Name)
-		if err != nil {
-			log.Printf("Cannot find gitlab application for release %s because of error %s, skipping", release.Name, err.Error())
-			continue
-		}
-		if !ctx.DryRun {
-			err = removeGitlabApplication(ctx.GitlabURL, ctx.GitlabToken, app.ID)
-			if err != nil {
-				log.Printf("Cannot delete gitlab application for release %s because of error %s, skipping", release.Name, err.Error())
-				continue
-			}
-		}
+		findAndRemoveGitlabApplication(ctx.GitlabURL, ctx.GitlabToken, release.Name, ctx.DryRun)
 	}
 }

@@ -21,7 +21,7 @@ type GitlabApplication struct {
 	Confidential    bool   `json:"confidential,omitempty"`
 }
 
-var GitlabApplicationNotFound error = fmt.Errorf("Cannot find the gitlab application")
+var GitlabApplicationDoesNotExist error = fmt.Errorf("The Gitlab application does not exist")
 
 func listGitlabApplications(gitlabURL *url.URL, apiToken SensitiveString) ([]GitlabApplication, error) {
 	reqURL := gitlabURL.JoinPath("/api/v4/applications").String()
@@ -54,7 +54,7 @@ func findGitlabApplication(gitlabURL *url.URL, apiToken SensitiveString, name st
 			return app, nil
 		}
 	}
-	return GitlabApplication{}, GitlabApplicationNotFound
+	return GitlabApplication{}, GitlabApplicationDoesNotExist
 }
 
 func removeGitlabApplication(gitlabURL *url.URL, apiToken SensitiveString, id int) error {
@@ -74,6 +74,22 @@ func removeGitlabApplication(gitlabURL *url.URL, apiToken SensitiveString, id in
 			return err
 		}
 		return fmt.Errorf("Gitlab responded with unexpected status code %d and content %s", res.StatusCode, resContent)
+	}
+	return nil
+}
+
+func findAndRemoveGitlabApplication(gitlabURL *url.URL, apiToken SensitiveString, name string, dryRun bool) error {
+	app, err := findGitlabApplication(gitlabURL, apiToken, name)
+	if err != nil {
+		log.Printf("Cannot find gitlab application for release %s because of error %s, skipping", name, err.Error())
+		return err
+	}
+	if !dryRun {
+		err = removeGitlabApplication(gitlabURL, apiToken, app.ID)
+		if err != nil {
+			log.Printf("Cannot delete gitlab application for release %s because of error %s, skipping", name, err.Error())
+			return err
+		}
 	}
 	return nil
 }
