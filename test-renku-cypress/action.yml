@@ -92,7 +92,6 @@ runs:
 
     - name: Run target Cypress test
       id: cypress-acceptance-tests
-      continue-on-error: true
       uses: cypress-io/github-action@v6
       env:
         BASE_URL: https://${{ inputs.renku-release }}.${{ inputs.kubernetes-cluster-fqdn }}
