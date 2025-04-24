@@ -131,3 +131,11 @@ runs:
         name: Cypress video - ${{ steps.sanitize.outputs.sanitized }} - ${{ github.run_id }}
         path: ${{ inputs.settings-working-directory }}/cypress/videos
         retention-days: 3
+
+    - name: Fail if any Cypress tests failed
+      id: fail-action
+      if: steps.cypress-acceptance-tests.outcome == 'failure'
+      shell: bash
+      run: |
+        echo "::error::Cypress tests failed."
+        exit 1
