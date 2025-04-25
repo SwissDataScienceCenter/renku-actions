@@ -92,7 +92,6 @@ runs:
 
     - name: Run target Cypress test
       id: cypress-acceptance-tests
-      continue-on-error: true
       uses: cypress-io/github-action@v6
       env:
         BASE_URL: https://${{ inputs.renku-release }}.${{ inputs.kubernetes-cluster-fqdn }}
@@ -110,13 +109,13 @@ runs:
 
     - name: Create artifact file name
       id: sanitize
-      if: steps.cypress-acceptance-tests.outcome == 'failure'
+      if: failure() && steps.cypress-acceptance-tests.outcome == 'failure'
       shell: bash
       run: echo "sanitized=$(echo '${{ inputs.e2e-target }}' | sed 's/[\/]/_/g')" >> $GITHUB_OUTPUT
 
     - name: Upload Cypress screenshot
       id: upload-screenshort
-      if: steps.cypress-acceptance-tests.outcome == 'failure' && steps.sanitize.outcome == 'success'
+      if: failure() && steps.cypress-acceptance-tests.outcome == 'failure' && steps.sanitize.outcome == 'success'
       uses: actions/upload-artifact@v4
       with:
         name: Cypress screenshot - ${{ steps.sanitize.outputs.sanitized }} - ${{ github.run_id }}
@@ -125,7 +124,7 @@ runs:
 
     - name: Upload Cypress video
       id: upload-video
-      if: steps.cypress-acceptance-tests.outcome == 'failure' && steps.sanitize.outcome == 'success'
+      if: failure() && steps.cypress-acceptance-tests.outcome == 'failure' && steps.sanitize.outcome == 'success'
       uses: actions/upload-artifact@v4
       with:
         name: Cypress video - ${{ steps.sanitize.outputs.sanitized }} - ${{ github.run_id }}
