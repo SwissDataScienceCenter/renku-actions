@@ -1,8 +1,43 @@
-name: 'cleanup-renku-ci-deployments'
-description: 'Cleanup old Renku CI deployments'
+name: "cleanup-renku-ci-deployments"
+description: "Cleanup old Renku CI deployments. Things will be deleted if the regex matches namespace OR releases regex."
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: "docker"
+  image: "Dockerfile"
+  args:
+    - rm
+    - "--kubeconfig=${{ inputs.kubeconfig }}"
+    - "--min-age=${{ inputs.minAge }}"
+    - "--release-regex=${{ inputs.releaseRegex }}"
+    - "--namespace-regex=${{ inputs.namespaceRegex }}"
+    - "--gitlab-token=${{ inputs.gitlabToken }}"
+    - "--gitlab-url=${{ inputs.gitlabUrl }}"
 branding:
-  icon: 'activity'
-  color: 'blue'
+  icon: "activity"
+  color: "blue"
+inputs:
+  kubeconfig:
+    description: "The path to the kubeconfig file to use."
+    required: false
+    default: "/kubeconfig"
+  minAge:
+    description: |
+      The minimum age of a helm release or namespace used to determine if it should be deleted. 
+      Parsed by golang time.ParseDuration(). Allowed units are h, m, s, ns, us, ms. Setting this
+      to zero will result in essentially no filtering by age being done.
+    required: false
+    default: "168h"
+  releaseRegex:
+    description: "The regex used to filter Helm releases, must parse to egrep (POSIX ERE) regex."
+    required: false
+    default: "^.+-ci-.+|^ci-.+"
+  namespaceRegex:
+    description: "The regex used to filter namespaces, must parse to egrep (POSIX ERE) regex."
+    required: false
+    default: "^.+-ci-.+|^ci-.+"
+  gitlabToken:
+    description: "The token to autheticate with Gitlab so that the OIDC applications can be deleted."
+    required: true
+  gitlabURL:
+    description: "The url for Gitlab."
+    required: false
+    default: "https://gitlab.dev.renku.ch"
