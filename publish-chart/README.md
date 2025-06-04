@@ -36,3 +36,4 @@ You can set these environment variables:
 | GITHUB_TOKEN         | None        | Yes      |
 | IMAGE_PREFIX         | None        | No       |
 | CHARTPRESS_SPEC_DIR  | .           | No       |
+| PLATFORMS            | linux/amd64 | No       |

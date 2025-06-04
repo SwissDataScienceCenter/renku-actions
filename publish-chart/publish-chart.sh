@@ -37,6 +37,19 @@ if [ -z "$CHARTPRESS_SPEC_DIR" ]; then
   CHARTPRESS_SPEC_DIR="."
 fi
 
+PLATFORM_ARGS=""
+BUILDER_ARG=""
+if [ ! -z "$PLATFORMS" ]; then
+  # setting up docker-buildx for multi-platform builds
+  docker buildx create --name multiarch --use
+  docker buildx inspect --bootstrap
+
+  for platform in $(echo $PLATFORMS | tr ',' ' '); do
+    PLATFORM_ARGS="$PLATFORM_ARGS --platform $platform"
+  done
+  BUILDER_ARG="--builder docker-buildx"
+fi
+
 # set up git
 git config --global user.email "$GIT_EMAIL"
 git config --global user.name "$GIT_USER"
@@ -49,4 +62,4 @@ echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
 
 # build and push the chart and images
 cd $CHARTPRESS_SPEC_DIR
-chartpress --push --publish-chart $CHART_TAG $IMAGE_PREFIX
+chartpress --push --publish-chart $CHART_TAG $IMAGE_PREFIX $PLATFORM_ARGS $BUILDER_ARG
