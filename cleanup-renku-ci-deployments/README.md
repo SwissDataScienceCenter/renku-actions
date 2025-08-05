@@ -7,11 +7,11 @@ The action has the following regex hardcoded for finding the namespaces and helm
 as the main dev deployment or developers' deployments.
 
 It uses the following parameters, passed in as environment variables:
-- `KUBECONFIG` (required) - the path to a valid kubeconfig used to run the `helm` and `kubectl` commands
 - `GITLAB_TOKEN` (required) - the Gitlab token used to cleanup the client applications for the CI deployment
 - `HELM_RELEASE_REGEX` (optional, defaults to `.*`) - additional regex to apply on top of the regex used to find CI deployments
 - `MAX_AGE_SECONDS` (optional, defaults to 604800 i.e. 1 week) - the age at or after which deployments are deleted, if set to zero (or negative) the deployment is immedidately deleted
 - `DELETE_NAMESPACE` (optional, defaults to true) - whether to delete the K8S namespace or not
+- `KUBECONFIG` (optional) - the path to a valid kubeconfig used to run the `helm` and `kubectl` commands
 
 The intended use of this action is to be setup as a scheduled workflow in github
 that runs periodically and cleans up old CI renku deploments.
