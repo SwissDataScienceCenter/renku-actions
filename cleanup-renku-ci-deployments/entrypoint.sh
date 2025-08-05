@@ -1,17 +1,16 @@
 #!/bin/bash
 set -e
 
-if test -z "$RENKUBOT_KUBECONFIG" ; then
-    echo 'Please specify a kubeconfig that can be used for the helm and kubectl commands.'
-    exit 1
-fi
-
-if test -z "$GITLAB_TOKEN" ; then
+if test -z "$GITLAB_TOKEN"; then
     echo 'Please specify a GITLAB TOKEN.'
     exit 1
 fi
 
 export KUBECONFIG=${KUBECONFIG:-"$PWD/.kubeconfig"}
+if [ -n "$RENKUBOT_KUBECONFIG" ]; then
+    echo "$RENKUBOT_KUBECONFIG" >"$KUBECONFIG" && chmod 400 "$KUBECONFIG"
+fi
+
 HELM_CI_RELEASE_REGEX=".+-ci-.+|^ci-.+"
 HELM_RELEASE_REGEX="${HELM_RELEASE_REGEX:=".*"}"
 K8S_CI_NAMESPACE_REGEX=".+-ci-.+|^ci-.+"
@@ -19,7 +18,6 @@ MAX_AGE_SECONDS=${MAX_AGE_SECONDS:=604800}
 GITLAB_URL="https://gitlab.dev.renku.ch"
 DELETE_NAMESPACE=${DELETE_NAMESPACE:="false"}
 
-echo "$RENKUBOT_KUBECONFIG" > "$KUBECONFIG" && chmod 400 "$KUBECONFIG"
 echo "Kubeconfig is at $KUBECONFIG."
 KUBECONFIG_LINES=$(wc -l $KUBECONFIG)
 echo "Kubeconfig is $KUBECONFIG_LINES long."

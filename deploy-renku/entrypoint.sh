@@ -13,7 +13,9 @@ export TLS_SECRET_NAME="${RENKU_RELEASE}-ch-tls"
 echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 
 # set up kube context and values file
-echo "$RENKUBOT_KUBECONFIG" > "$KUBECONFIG" && chmod 400 "$KUBECONFIG"
+if [ -n "$RENKUBOT_KUBECONFIG" ]; then
+  echo "$RENKUBOT_KUBECONFIG" >"$KUBECONFIG" && chmod 400 "$KUBECONFIG"
+fi
 
 cp $RENKU_VALUES $RENKU_VALUES_FILE
 
