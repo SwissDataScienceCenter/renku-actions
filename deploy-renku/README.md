@@ -32,7 +32,6 @@ deploy-pr:
       RENKU_RELEASE: ci-renku-${{ github.event.number }}
       RENKU_VALUES_FILE: "${{ github.workspace }}/values.yaml"
       RENKU_VALUES: ${{ secrets.CI_RENKU_VALUES }}
-      RENKUBOT_KUBECONFIG: ${{ secrets.RENKUBOT_DEV_KUBECONFIG }}
       TEST_ARTIFACTS_PATH: "tests-artifacts-${{ github.sha }}"
       renku: "@${{ github.head_ref }}"
       renku_core: "${{ needs.check-deploy.outputs.renku-core }}"

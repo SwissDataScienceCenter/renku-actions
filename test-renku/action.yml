@@ -2,7 +2,7 @@ name: "test-renku"
 description: "Run the legacy Scala/Selenium acceptance tests for a Renku CI deployment"
 inputs:
   kubeconfig:
-    description: "The contents of the kubeconfig file to be used for helm/kubectl commands."
+    description: "The path to a kubeconfig file to be used for helm/kubectl commands."
     required: true
   renku-release:
     description: "The name of the helm release."
@@ -39,7 +39,7 @@ runs:
       run: ${{ github.action_path }}/entrypoint.sh
       shell: bash
       env:
-        RENKUBOT_KUBECONFIG: ${{ inputs.kubeconfig }}
+        KUBECONFIG: ${{ inputs.kubeconfig }}
         RENKU_RELEASE: ${{ inputs.renku-release }}
         TEST_TIMEOUT_MINS: ${{ inputs.test-timeout-mins }}
     - name: Download artifact for packaging on failure

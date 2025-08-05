@@ -10,7 +10,7 @@ This is a composite action that:
 steps:
 - uses: SwissDataScienceCenter/renku-actions/test-renku
   with:
-    renkubot-kubeconfig: ${{ secrets.RENKUBOT_DEV_KUBECONFIG }}
+    kubeconfig: /home/jdoe/.kube/config
     renku-release: ci-renku-${{ github.event.number }}
     gitlab-token: ${{ secrets.DEV_GITLAB_TOKEN }}
     ci-renku-values: ${{ secrets.CI_RENKU_VALUES }}
@@ -20,7 +20,7 @@ steps:
 
 | Variable name        | Default     | Required |
 | -------------------- | ----------- | ---------|
-| renkubot-kubeconfig  | helm-chart/ | Yes      |
+| kubeconfig           | None        | Yes      |
 | renku-release        | None        | Yes      |
 | gitlab-token         | None        | Yes      |
 | test-timeout-mins    | 60          | No       |
