@@ -1,6 +1,25 @@
 #!/bin/sh
 set -e
 
+if [ "$INPUT_AZURE_LOGIN" = "true" ]; then
+  echo "Trying to log into Azure"
+  if [ -z "$INPUT_AZURE_CLIENT_ID" ]; then
+    echo "Azure client id is not set, but you requested to log in with Azure."
+    exit 1
+  fi
+  if [ -z "$INPUT_AZURE_TENANT_ID" ]; then
+    echo "Azure tenant id is not set, but you requested to log in with Azure."
+    exit 1
+  fi
+  if [ -z "$INPUT_AZURE_SUBSCRIPTION_ID" ]; then
+    echo "Azure subscription id is not set, but you requested to log in with Azure."
+    exit 1
+  fi
+  az account set --subscription "$INPUT_AZURE_SUBSCRIPTION_ID"
+  az login --tentant "$INPUT_AZURE_TENANT_ID" --client-id "$INPUT_AZURE_CLIENT_ID"
+  az aks get-credentials --resource-group "$INPUT_AZURE_RESOURCE_GROUP" --name aks-switzerlandnorth-renku-dev
+fi
+
 RENKU_NAMESPACE=${RENKU_NAMESPACE:-$RENKU_RELEASE}
 KUBERNETES_CLUSTER_FQDN=${KUBERNETES_CLUSTER_FQDN:-"dev.renku.ch"}
 
@@ -36,12 +55,12 @@ if [ -n "$ENABLE_NGINX_INGRESS" ]; then
 fi
 
 # register the GitLab app
-if test -n "$GITLAB_TOKEN" ; then
+if test -n "$GITLAB_TOKEN"; then
   gitlab_app=$(curl -s -X POST ${GITLAB_URL}/api/v4/applications \
-                        -H "private-token: $GITLAB_TOKEN" \
-                        --data "name=${RENKU_RELEASE}" \
-                        --data "redirect_uri=https://${RENKU_RELEASE}.${KUBERNETES_CLUSTER_FQDN}/auth/realms/Renku/broker/dev-renku/endpoint https://${RENKU_RELEASE}.${KUBERNETES_CLUSTER_FQDN}/api/auth/gitlab/token https://${RENKU_RELEASE}.${KUBERNETES_CLUSTER_FQDN}/api/auth/callback" \
-                        --data "scopes=api read_user read_repository read_registry openid")
+    -H "private-token: $GITLAB_TOKEN" \
+    --data "name=${RENKU_RELEASE}" \
+    --data "redirect_uri=https://${RENKU_RELEASE}.${KUBERNETES_CLUSTER_FQDN}/auth/realms/Renku/broker/dev-renku/endpoint https://${RENKU_RELEASE}.${KUBERNETES_CLUSTER_FQDN}/api/auth/gitlab/token https://${RENKU_RELEASE}.${KUBERNETES_CLUSTER_FQDN}/api/auth/callback" \
+    --data "scopes=api read_user read_repository read_registry openid")
   export APP_ID=$(echo $gitlab_app | jq -r '.application_id')
   export APP_SECRET=$(echo $gitlab_app | jq -r '.secret')
 

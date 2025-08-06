@@ -2,7 +2,8 @@ chartpress==2.1.0
 kubernetes
 packaging
 json-merge-patch
-ruamel.yaml<0.17.10
-ruamel.yaml.clib<0.2.4
+ruamel.yaml==0.18.14
+ruamel.yaml.clib==0.2.12
 # requests 2.32.0 has a bug with not allowing docker+http protocol, see requests/issues/6707
 requests<2.32.0
+azure-cli==2.76.0

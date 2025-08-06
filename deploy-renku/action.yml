@@ -6,3 +6,21 @@ runs:
 branding:
   icon: 'activity'
   color: 'blue'
+inputs:
+  azure_login:
+    description: "Whether to log into Azure and get a kubeconfig, set to 'true' to enable it. Other 'truthy' values will not be treated as true."
+    required: false
+    default: "false"
+  azure_client_id:
+    description: "Azure client ID, required if azure-login is set to true."
+    required: false
+  azure_tenant_id:
+    description: "Azure tenant ID, required if azure-login is set to true."
+    required: false
+  azure_subscription_id:
+    description: "Azure subscription ID, required if azure-login is set to true."
+    required: false
+  azure_resource_group:
+    description: "The azure resource group to be used"
+    required: false
+    default: "renku-dev"
