@@ -21,6 +21,6 @@ inputs:
     description: "Azure subscription ID, required if azure-login is set to true."
     required: false
   azure_resource_group:
-    description: "The azure resource group to be used"
+    description: "The azure resource group to be used, required if azure-login is set to true."
     required: false
     default: "renku-dev"
