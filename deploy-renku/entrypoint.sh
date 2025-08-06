@@ -15,7 +15,7 @@ if [ "$INPUT_AZURE_LOGIN" = "true" ]; then
     echo "Azure subscription id is not set, but you requested to log in with Azure."
     exit 1
   fi
-  az login --tentant "$INPUT_AZURE_TENANT_ID" --client-id "$INPUT_AZURE_CLIENT_ID"
+  az login --tenant "$INPUT_AZURE_TENANT_ID" --client-id "$INPUT_AZURE_CLIENT_ID"
   az account set --subscription "$INPUT_AZURE_SUBSCRIPTION_ID"
   az aks get-credentials --resource-group "$INPUT_AZURE_RESOURCE_GROUP" --name aks-switzerlandnorth-renku-dev
 fi
