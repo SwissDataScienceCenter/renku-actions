@@ -37,7 +37,7 @@ for NAMESPACE in $NAMESPACES; do
             if [[ $AGE_SECONDS -ge $MAX_AGE_SECONDS ]] || [[ $MAX_AGE_SECONDS -le 0 ]]; then
                 # remove any jupyterservers - they have finalizers that prevent the namespces to be deleted
                 echo "Deleting all JupyterServers in namespace $NAMESPACE."
-                kubectl -n $NAMESPACE delete --all --wait --cascade="foreground" jupyterserver
+                kubectl -n $NAMESPACE delete --all --wait --cascade="foreground" jupyterserver || true
                 # remove any amaltheasessions - they have finalizers that prevent the namespces to be deleted
                 echo "Deleting all AmaltheaSessions in namespace $NAMESPACE."
                 kubectl -n $NAMESPACE delete --all --wait --cascade="foreground" amaltheasession
