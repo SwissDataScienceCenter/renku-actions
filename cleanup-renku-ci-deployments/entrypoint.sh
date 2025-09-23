@@ -35,9 +35,9 @@ for NAMESPACE in $NAMESPACES; do
             LAST_DEPLOYED_AT=$(helm -n $NAMESPACE history $RELEASE -o json | jq -r 'last | .updated | sub("\\.[0-9]{6}.*$"; "Z") | fromdateiso8601')
             AGE_SECONDS=$(expr $NOW - $LAST_DEPLOYED_AT)
             if [[ $AGE_SECONDS -ge $MAX_AGE_SECONDS ]] || [[ $MAX_AGE_SECONDS -le 0 ]]; then
-                # remove any jupyterservers - they have finalizers that prevent the namespces to be deleted
-                echo "Deleting all JupyterServers in namespace $NAMESPACE."
-                kubectl -n $NAMESPACE delete --all --wait --cascade="foreground" jupyterserver
+                # NOTE: CI deployments do not have the JupyterServer CRD
+                # echo "Deleting all JupyterServers in namespace $NAMESPACE."
+                # kubectl -n $NAMESPACE delete --all --wait --cascade="foreground" jupyterserver
                 # remove any amaltheasessions - they have finalizers that prevent the namespces to be deleted
                 echo "Deleting all AmaltheaSessions in namespace $NAMESPACE."
                 kubectl -n $NAMESPACE delete --all --wait --cascade="foreground" amaltheasession
