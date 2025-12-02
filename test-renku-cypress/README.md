@@ -1,7 +1,7 @@
 # Run Cypress-based acceptance tests
 
 This is a composite action that:
-- Clones the Renku repository `inputs.renku-repository` and checks out the specified referece `inputs.renku-reference` at the target path `inputs.renku-path`.
+- Clones the Renku repository `inputs.renku-repository` and checks out the specified reference `inputs.renku-reference` at the target path `inputs.renku-path`.
 - Runs the Cypress acceptance tests target file `inputs.e2e-target` after checking the infrastructure with the `e2e-infrastructure-check` file. Mind you can change the e2e folder `e2e-folder` and the Cypress files suffix `e2e-suffix`.
 - Saves the videos and images as an artifact when the tests fail.
 

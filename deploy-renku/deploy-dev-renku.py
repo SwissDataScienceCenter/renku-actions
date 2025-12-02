@@ -15,6 +15,7 @@ import pprint
 import re
 import tempfile
 import urllib.request
+from argparse import ArgumentParser
 from pathlib import Path
 from subprocess import check_call
 
@@ -97,7 +98,7 @@ class RenkuRequirement(object):
         if self.component == "amalthea-sessions":
             return "https://github.com/SwissDataScienceCenter/amalthea.git"
         if self.component == "secrets-storage":
-            return f"https://github.com/SwissDataScienceCenter/renku-data-services.git"
+            return "https://github.com/SwissDataScienceCenter/renku-data-services.git"
         return f"https://github.com/SwissDataScienceCenter/{self.component}.git"
 
     @property
@@ -148,7 +149,7 @@ def configure_component_versions(component_versions: dict, values_file: Path) ->
     patches = {}
     for component, version in component_versions.items():
         if version:
-            # form and setup the requirement
+            # form and set up the requirement
             req = RenkuRequirement(component.replace("_", "-"), version, tempdir)
             if req.ref:
                 req.setup()
@@ -184,7 +185,7 @@ def set_rp_version(values_file, extra_values):
     if values.get("global", {}).get("renku", {}).get("cli_version") or (
         extra_values and "global.renku.cli_version" in extra_values
     ):
-        print("CLI version for new projects is overriden in values file.")
+        print("CLI version for new projects is overridden in values file.")
         return
 
     core_version = (
@@ -233,8 +234,6 @@ def set_rp_version(values_file, extra_values):
 
 
 if __name__ == "__main__":
-    from argparse import ArgumentParser
-
     parser = ArgumentParser()
     for component in components:
         default = os.environ.get(component.replace("-", "_"))
