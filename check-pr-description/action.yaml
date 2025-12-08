@@ -8,22 +8,14 @@ inputs:
     description: String to search for in the PR description
     required: false
     default: "/deploy"
-  test-enabled-default:
-    description: Default value for test-enabled
-    required: false
-    default: "true"
-  test-enabled-switch-string:
-    description: String to switch the default behaviour for tests
+  test-disabled-switch-string:
+    description: String to disable tests
     required: false
     default: "#notest"
-  test-legacy-enabled-default:
-    description: Default value for test-legacy-enabled
+  test-slow-enabled-switch-string:
+    description: String to enable slow tests; they won't run unless explicitly enabled
     required: false
-    default: "false"
-  test-legacy-enabled-switch-string:
-    description: String to switch the default behaviour for legacy tests
-    required: false
-    default: "#legacy"
+    default: "#slow"
 outputs:
   pr-contains-string:
     description: true/false whether the PR description contains the string
@@ -67,9 +59,9 @@ outputs:
   test-enabled:
     description: whether the acceptance tests should run or not. Default is true
     value: ${{ steps.check-string.outputs.test-enabled }}
-  test-legacy-enabled:
-    description: whether the legacy acceptance tests should run or not. Default is false
-    value: ${{ steps.check-string.outputs.test-legacy-enabled }}
+  test-slow-enabled:
+    description: whether the slow acceptance tests should run or not. Default is false
+    value: ${{ steps.check-string.outputs.test-slow-enabled }}
 runs:
   using: "composite"
   steps:
@@ -80,16 +72,8 @@ runs:
         pr_contains_string=$(echo $pr_text | jq 'test("${{ inputs.string }}")' || echo "false")
         echo "pr-contains-string=$pr_contains_string" >> $GITHUB_OUTPUT
         echo "String found: $pr_contains_string"
-        if [ "${{ inputs.test-enabled-default }}" = "true" ]; then
-          test_enabled=true
-        else
-          test_enabled=false
-        fi
-        if [ "${{ inputs.test-legacy-enabled-default }}" = "true" ]; then
-          test_legacy_enabled=true
-        else
-          test_legacy_enabled=false
-        fi
+        test_enabled=true
+        test_slow_enabled=false
         if [ "$pr_contains_string" = true ] ; then
           command=$(echo $pr_text | jq -r 'split("${{ inputs.string }} ") | last | split("\r\n") | first')
           if [[ $command != *"${{ inputs.string }}"* ]]; then
@@ -149,21 +133,13 @@ runs:
               echo "renku-search reference: ${BASH_REMATCH[1]}"
               echo "renku-search=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
-            match="${{ inputs.test-enabled-switch-string }}"
+            match="${{ inputs.test-disabled-switch-string }}"
             if [[ $command =~ $match ]]; then
-              if [ "$test_enabled" = true ]; then
-                test_enabled=false
-              else
-                test_enabled=true
-              fi
+              test_enabled=false
             fi
-            match="${{ inputs.test-legacy-enabled-switch-string }}"
+            match="${{ inputs.test-slow-enabled-switch-string }}"
             if [[ $command =~ $match ]]; then
-              if [ "$test_legacy_enabled" = true ]; then
-                test_legacy_enabled=false
-              else
-                test_legacy_enabled=true
-              fi
+              test_slow_enabled=true
             fi
             match="extra-values=(\S*)"
             if [[ $command =~ $match ]]; then
@@ -176,7 +152,7 @@ runs:
         fi
         echo "Test enabled: $test_enabled"
         echo "test-enabled=${test_enabled}" >> $GITHUB_OUTPUT
-        echo "Legacy tests enabled: $test_legacy_enabled"
-        echo "test-legacy-enabled=${test_legacy_enabled}" >> $GITHUB_OUTPUT
-        
+        echo "Slow tests enabled: $test_slow_enabled"
+        echo "test-slow-enabled=${test_slow_enabled}" >> $GITHUB_OUTPUT
+
       shell: bash
