@@ -116,7 +116,7 @@ runs:
     - name: Upload Cypress screenshot
       id: upload-screenshort
       if: failure() && steps.cypress-acceptance-tests.outcome == 'failure' && steps.sanitize.outcome == 'success'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: Cypress screenshot - ${{ steps.sanitize.outputs.sanitized }} - ${{ github.run_id }}
         path: ${{ inputs.settings-working-directory }}/cypress/screenshots
@@ -125,7 +125,7 @@ runs:
     - name: Upload Cypress video
       id: upload-video
       if: failure() && steps.cypress-acceptance-tests.outcome == 'failure' && steps.sanitize.outcome == 'success'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: Cypress video - ${{ steps.sanitize.outputs.sanitized }} - ${{ github.run_id }}
         path: ${{ inputs.settings-working-directory }}/cypress/videos
