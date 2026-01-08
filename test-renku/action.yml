@@ -53,7 +53,7 @@ runs:
         s3-results-artifacts-path: "tests-artifacts-${{ github.sha }}"
     - name: Upload screenshots on failure
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: acceptance-test-artifacts
         path: ${{ github.workspace }}/test-artifacts/
