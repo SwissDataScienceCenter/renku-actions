@@ -1,4 +1,4 @@
-FROM docker:24.0.6-git
+FROM docker:25.0.5-git
 
 # install dependencies
 # Note: Chartpress 0.7.0 is the latest version compatible until https://github.com/jupyterhub/chartpress/issues/118 is fixed
