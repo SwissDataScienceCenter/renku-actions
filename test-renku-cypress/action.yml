@@ -92,7 +92,7 @@ runs:
 
     - name: Run target Cypress test
       id: cypress-acceptance-tests
-      uses: cypress-io/github-action@v6
+      uses: cypress-io/github-action@v7
       env:
         BASE_URL: https://${{ inputs.renku-release }}.${{ inputs.kubernetes-cluster-fqdn }}
         TEST_EMAIL: ${{ inputs.test-user-email }}
