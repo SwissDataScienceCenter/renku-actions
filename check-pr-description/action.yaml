@@ -23,9 +23,6 @@ outputs:
   renku:
     description: renku reference as specified in the command string
     value: ${{ steps.check-string.outputs.renku }}
-  renku-core:
-    description: renku-core reference as specified in the command string
-    value: ${{ steps.check-string.outputs.renku-core }}
   renku-gateway:
     description: renku-gateway reference as specified in the command string
     value: ${{ steps.check-string.outputs.renku-gateway }}
@@ -76,11 +73,6 @@ runs:
             if [[ $command =~ $match ]]; then
               echo "renku reference: ${BASH_REMATCH[1]}"
               echo "renku=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
-            fi
-            match="renku-core=(\S*)"
-            if [[ $command =~ $match ]]; then
-              echo "renku-core reference: ${BASH_REMATCH[1]}"
-              echo "renku-core=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
             match="renku-gateway=(\S*)"
             if [[ $command =~ $match ]]; then

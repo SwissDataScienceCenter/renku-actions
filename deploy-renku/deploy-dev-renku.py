@@ -24,7 +24,6 @@ import yaml
 from packaging.version import Version
 
 components = [
-    "renku-core",
     "renku-gateway",
     "renku-notebooks",
     "renku-ui",
@@ -176,36 +175,12 @@ def set_rp_version(values_file, extra_values):
         print("CLI version for new projects is overridden in values file.")
         return
 
-    core_version = (
-        values.get("global", {})
-        .get("core", {})
-        .get("versions", {})
-        .get("latest", {})
-        .get("image", {})
-        .get("tag", "unknown")
-    )
-    if re.match(r"^v[0-9]+\.[0-9]+\.[0-9]+.*", core_version):
-        # NOTE: Remove the starting "v" present in a version tag for an image
-        core_version = core_version[1:]
-
     # get current rp versions from pypi
     with urllib.request.urlopen("https://pypi.org/pypi/renku/json") as f:
         rp_pypi_data = json.load(f)
 
     # get newest version available
-    rp_versions = [
-        Version(k)
-        for k in rp_pypi_data["releases"].keys()
-        if k.startswith(core_version)
-    ]
-
-    if not rp_versions:
-        # fall back to using latest version
-        newest_version = sorted([Version(k) for k in rp_pypi_data["releases"].keys()])[
-            -1
-        ]
-    else:
-        newest_version = sorted(rp_versions)[-1]
+    newest_version = sorted([Version(k) for k in rp_pypi_data["releases"].keys()])[-1]
 
     print(f"Setting renku cli version to {newest_version}")
 

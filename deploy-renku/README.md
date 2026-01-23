@@ -34,7 +34,6 @@ deploy-pr:
       RENKU_VALUES: ${{ secrets.CI_RENKU_VALUES }}
       TEST_ARTIFACTS_PATH: "tests-artifacts-${{ github.sha }}"
       renku: "@${{ github.head_ref }}"
-      renku_core: "${{ needs.check-deploy.outputs.renku-core }}"
       renku_gateway: "${{ needs.check-deploy.outputs.renku-gateway }}"
       renku_notebooks: "${{ needs.check-deploy.outputs.renku-notebooks }}"
       renku_ui: "${{ needs.check-deploy.outputs.renku-ui }}"
