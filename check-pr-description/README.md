@@ -19,7 +19,6 @@ The supported components are:
 - `renku`
 - `renku-core`
 - `renku-gateway`
-- `renku-graph`
 - `renku-notebooks`
 - `renku-ui` (that includes the `renku-ui-server` component, since the version is
   aligned between the 2 components)

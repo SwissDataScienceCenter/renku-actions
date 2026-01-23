@@ -26,7 +26,6 @@ from packaging.version import Version
 components = [
     "renku-core",
     "renku-gateway",
-    "renku-graph",
     "renku-notebooks",
     "renku-ui",
     "renku-data-services",

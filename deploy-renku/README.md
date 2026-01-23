@@ -36,7 +36,6 @@ deploy-pr:
       renku: "@${{ github.head_ref }}"
       renku_core: "${{ needs.check-deploy.outputs.renku-core }}"
       renku_gateway: "${{ needs.check-deploy.outputs.renku-gateway }}"
-      renku_graph: "${{ needs.check-deploy.outputs.renku-graph }}"
       renku_notebooks: "${{ needs.check-deploy.outputs.renku-notebooks }}"
       renku_ui: "${{ needs.check-deploy.outputs.renku-ui }}"
       renku_data_services: "${{ needs.check-deploy.outputs.renku-data-services }}"
