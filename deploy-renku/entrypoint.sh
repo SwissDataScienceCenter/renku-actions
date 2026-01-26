@@ -21,7 +21,6 @@ cp $RENKU_VALUES $RENKU_VALUES_FILE
 
 # Set the FQDN in the values file
 export FQDN="${RENKU_RELEASE}.${KUBERNETES_CLUSTER_FQDN}"
-yq eval ".amalthea.deployCrd = false" -i $RENKU_VALUES_FILE
 yq eval ".amalthea-sessions.deployCrd = false" -i $RENKU_VALUES_FILE
 yq eval '.global.renku.domain = strenv(FQDN)' -i $RENKU_VALUES_FILE
 yq eval '.ingress.hosts[0] = strenv(FQDN)' -i $RENKU_VALUES_FILE

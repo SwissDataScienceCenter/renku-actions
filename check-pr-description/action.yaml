@@ -47,9 +47,6 @@ outputs:
   renku-search:
     description: renku-search reference as specified in the command string
     value: ${{ steps.check-string.outputs.renku-search }}
-  amalthea:
-    description: amalthea reference as specified in the command string
-    value: ${{ steps.check-string.outputs.amalthea}}
   amalthea-sessions:
     description: reference to the new amalthea operator helm chart
     value: ${{ steps.check-string.outputs.amalthea-sessions}}
@@ -107,11 +104,6 @@ runs:
             if [[ $command =~ $match ]]; then
               echo "amalthea-sessions reference: ${BASH_REMATCH[1]}"
               echo "amalthea-sessions=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
-            fi
-            match="amalthea=(\S*)"
-            if [[ $command =~ $match ]]; then
-              echo "amalthea reference: ${BASH_REMATCH[1]}"
-              echo "amalthea=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
             match="renku-ui=(\S*)"
             if [[ $command =~ $match ]]; then

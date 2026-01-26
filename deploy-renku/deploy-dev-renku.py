@@ -31,7 +31,6 @@ components = [
     "renku-ui",
     "renku-data-services",
     "renku-search",
-    "amalthea",
     "amalthea-sessions",
     "secrets-storage",
 ]
@@ -154,16 +153,6 @@ def configure_component_versions(component_versions: dict, values_file: Path) ->
             if req.ref:
                 req.setup()
                 patches[component] = req.update_values(values_file)
-            if component == "amalthea":
-                reqs_path = tempdir / "renku" / "helm-chart/renku/requirements.yaml"
-                with open(reqs_path) as f:
-                    reqs = yaml.load(f, Loader=yaml.SafeLoader)
-                for dep in reqs["dependencies"]:
-                    if dep["name"] == component.replace("_", "-"):
-                        dep["version"] = req.version
-                        dep["repository"] = req.helm_repo
-                with open(reqs_path, "w") as f:
-                    yaml.dump(reqs, f)
             if component == "amalthea_sessions":
                 reqs_path = tempdir / "renku" / "helm-chart/renku/requirements.yaml"
                 with open(reqs_path) as f:
