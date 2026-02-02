@@ -32,7 +32,7 @@ runs:
   using: "composite"
   steps:
     - name: "Setup Helm"
-      uses: azure/setup-helm@v1
+      uses: azure/setup-helm@v4
       with:
         version: "3.6.3"
     - name: "Run tests"
