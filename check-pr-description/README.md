@@ -17,9 +17,7 @@ reference like a tag or a branch name (E.G. `renku-ui=0.11.9` or
 
 The supported components are:
 - `renku`
-- `renku-core`
 - `renku-gateway`
-- `renku-graph`
 - `renku-notebooks`
 - `renku-ui` (that includes the `renku-ui-server` component, since the version is
   aligned between the 2 components)
