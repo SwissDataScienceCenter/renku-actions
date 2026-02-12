@@ -26,7 +26,6 @@ deploy-pr:
     env:
       DOCKER_PASSWORD: ${{ secrets.RENKU_DOCKER_PASSWORD }}
       DOCKER_USERNAME: ${{ secrets.RENKU_DOCKER_USERNAME }}
-      GITLAB_TOKEN: ${{ secrets.DEV_GITLAB_TOKEN }}
       KUBECONFIG: "${{ github.workspace }}/renkubot-kube.config"
       RENKU_ANONYMOUS_SESSIONS: true
       RENKU_RELEASE: ci-renku-${{ github.event.number }}

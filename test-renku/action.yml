@@ -7,9 +7,6 @@ inputs:
   renku-release:
     description: "The name of the helm release."
     required: true
-  gitlab-token:
-    description: "A gitlab token used for the cleanup of application in Gitlab."
-    required: true
   s3-results-host:
     default: os.zhdk.cloud.switch.ch
     description: S3 host where the tests artifacts have been stored
