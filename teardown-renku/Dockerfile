@@ -1,4 +1,4 @@
-FROM alpine/k8s:1.16.8
+FROM alpine/k8s:1.32.11
 
 COPY entrypoint.sh /
 ENTRYPOINT /entrypoint.sh
