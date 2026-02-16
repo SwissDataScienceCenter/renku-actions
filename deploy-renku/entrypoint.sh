@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+source /app/.venv/bin/activate
+
 RENKU_NAMESPACE=${RENKU_NAMESPACE:-$RENKU_RELEASE}
 KUBERNETES_CLUSTER_FQDN=${KUBERNETES_CLUSTER_FQDN:-"dev.renku.ch"}
 
