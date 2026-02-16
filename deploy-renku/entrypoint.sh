@@ -56,4 +56,4 @@ kubectl create namespace ${RENKU_NAMESPACE} || true
 helm repo add renku https://swissdatasciencecenter.github.io/helm-charts
 helm repo update
 
-python3 /deploy-dev-renku.py
+/app/.venv/bin/python3 /deploy-dev-renku.py
