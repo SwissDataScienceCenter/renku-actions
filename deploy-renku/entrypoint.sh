@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+source /app/.venv/bin/activate
+
 RENKU_NAMESPACE=${RENKU_NAMESPACE:-$RENKU_RELEASE}
 KUBERNETES_CLUSTER_FQDN=${KUBERNETES_CLUSTER_FQDN:-"dev.renku.ch"}
 
@@ -56,4 +58,4 @@ kubectl create namespace ${RENKU_NAMESPACE} || true
 helm repo add renku https://swissdatasciencecenter.github.io/helm-charts
 helm repo update
 
-/app/.venv/bin/python3 /deploy-dev-renku.py
+python3 /deploy-dev-renku.py
