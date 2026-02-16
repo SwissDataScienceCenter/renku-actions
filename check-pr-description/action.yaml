@@ -23,15 +23,9 @@ outputs:
   renku:
     description: renku reference as specified in the command string
     value: ${{ steps.check-string.outputs.renku }}
-  renku-core:
-    description: renku-core reference as specified in the command string
-    value: ${{ steps.check-string.outputs.renku-core }}
   renku-gateway:
     description: renku-gateway reference as specified in the command string
     value: ${{ steps.check-string.outputs.renku-gateway }}
-  renku-graph:
-    description: renku-graph reference as specified in the command string
-    value: ${{ steps.check-string.outputs.renku-graph }}
   renku-notebooks:
     description: renku-notebooks reference as specified in the command string
     value: ${{ steps.check-string.outputs.renku-notebooks }}
@@ -80,20 +74,10 @@ runs:
               echo "renku reference: ${BASH_REMATCH[1]}"
               echo "renku=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
-            match="renku-core=(\S*)"
-            if [[ $command =~ $match ]]; then
-              echo "renku-core reference: ${BASH_REMATCH[1]}"
-              echo "renku-core=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
-            fi
             match="renku-gateway=(\S*)"
             if [[ $command =~ $match ]]; then
               echo "renku-gateway reference: ${BASH_REMATCH[1]}"
               echo "renku-gateway=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
-            fi
-            match="renku-graph=(\S*)"
-            if [[ $command =~ $match ]]; then
-              echo "renku-graph reference: ${BASH_REMATCH[1]}"
-              echo "renku-graph=@${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             fi
             match="renku-notebooks=(\S*)"
             if [[ $command =~ $match ]]; then
