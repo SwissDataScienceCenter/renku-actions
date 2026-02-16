@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+source /app/.venv/bin/activate
+
 RENKU_NAMESPACE=${RENKU_NAMESPACE:-$RENKU_RELEASE}
 KUBERNETES_CLUSTER_FQDN=${KUBERNETES_CLUSTER_FQDN:-"dev.renku.ch"}
 
@@ -29,7 +31,15 @@ if [ -n "$ENABLE_NGINX_INGRESS" ]; then
 fi
 
 # create namespace and ignore error in case it already exists
-kubectl create namespace ${RENKU_NAMESPACE} || true
+kubectl create namespace "${RENKU_NAMESPACE}" || true
+kubectl label ns "${RENKU_NAMESPACE}" "renku.io/ci-deployment=true"
+
+if [ -n "$PR_URL" ]; then
+  # NOTE: That a full url cannot be used as a label value because label values have a more restricted
+  # set of characters that are allowed and some of the special characters in urls are possible in annotations
+  # but not for labels.
+  kubectl patch ns "${RENKU_NAMESPACE}" --patch "{\"metadata\": {\"annotations\": {\"renku.io/pr-url\": \"${PR_URL}\"}}}"
+fi
 
 # deploy renku - reads config from environment variables
 helm repo add renku https://swissdatasciencecenter.github.io/helm-charts
