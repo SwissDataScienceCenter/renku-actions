@@ -12,7 +12,6 @@ steps:
   with:
     kubeconfig: /home/jdoe/.kube/config
     renku-release: ci-renku-${{ github.event.number }}
-    gitlab-token: ${{ secrets.DEV_GITLAB_TOKEN }}
     ci-renku-values: ${{ secrets.CI_RENKU_VALUES }}
 ```
 
@@ -22,6 +21,5 @@ steps:
 | -------------------- | ----------- | ---------|
 | kubeconfig           | None        | Yes      |
 | renku-release        | None        | Yes      |
-| gitlab-token         | None        | Yes      |
 | test-timeout-mins    | 60          | No       |
 | ci-renku-values      | None        | Yes      |
