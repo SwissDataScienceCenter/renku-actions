@@ -1,6 +1,8 @@
 #!/bin/sh
 set -xe
 
+source /app/.venv/bin/activate
+
 if echo $GITHUB_REF | grep "tags" - > /dev/null; then
   CHART_TAG="--tag $(echo ${GITHUB_REF} | cut -d/ -f3)"
 fi
