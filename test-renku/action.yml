@@ -41,7 +41,7 @@ runs:
         TEST_TIMEOUT_MINS: ${{ inputs.test-timeout-mins }}
     - name: Download artifact for packaging on failure
       if: failure()
-      uses: SwissDataScienceCenter/renku-actions/download-test-artifacts@v1.21.0
+      uses: SwissDataScienceCenter/renku-actions/download-test-artifacts@v1.23.1
       with:
         s3-results-host: ${{ inputs.s3-results-host }}
         s3-results-bucket: ${{ inputs.s3-results-bucket }}
