@@ -1,4 +1,4 @@
-FROM docker:24.0.6-git
+FROM docker:29.2.1-dind
 
 # install dependencies
 RUN apk add python3 py-pip py3-ruamel.yaml && \
