@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -ex
 
 source /app/.venv/bin/activate
 
