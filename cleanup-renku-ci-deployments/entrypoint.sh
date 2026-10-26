@@ -1,24 +1,17 @@
 #!/bin/bash
 set -e
 
-if test -z "$GITLAB_TOKEN"; then
-    echo 'Please specify a GITLAB TOKEN.'
-    exit 1
-fi
-
 export KUBECONFIG=${KUBECONFIG:-"$PWD/.kubeconfig"}
 
 HELM_CI_RELEASE_REGEX=".+-ci-.+|^ci-.+"
 HELM_RELEASE_REGEX="${HELM_RELEASE_REGEX:=".*"}"
 K8S_CI_NAMESPACE_REGEX=".+-ci-.+|^ci-.+"
 MAX_AGE_SECONDS=${MAX_AGE_SECONDS:=604800}
-GITLAB_URL="https://gitlab.dev.renku.ch"
 DELETE_NAMESPACE=${DELETE_NAMESPACE:="false"}
 
 echo "Kubeconfig is at $KUBECONFIG."
 KUBECONFIG_LINES=$(wc -l $KUBECONFIG)
 echo "Kubeconfig is $KUBECONFIG_LINES long."
-echo "GitLab URL is $GITLAB_URL"
 echo "Looking for CI releases with regex $HELM_RELEASE_REGEX."
 echo "Looking in namespaces with regex $K8S_CI_NAMESPACE_REGEX."
 echo "Age threshold for deletion is $MAX_AGE_SECONDS seconds."
@@ -41,12 +34,6 @@ for NAMESPACE in $NAMESPACES; do
                 # remove any amaltheasessions - they have finalizers that prevent the namespces to be deleted
                 echo "Deleting all AmaltheaSessions in namespace $NAMESPACE."
                 kubectl -n $NAMESPACE delete --all --wait --cascade="foreground" amaltheasession
-                # remove the gitlab app
-                APPS=$(curl -s ${GITLAB_URL}/api/v4/applications -H "private-token: ${GITLAB_TOKEN}" | jq -r ".[] | select(.application_name == \"${RELEASE}\") | .id")
-                for APP in $APPS; do
-                    echo "Deleting Gitlab application client $APP."
-                    curl -X DELETE ${GITLAB_URL}/api/v4/applications/${APP} -H "private-token: ${GITLAB_TOKEN}"
-                done
                 # delete the helm chart
                 echo "Deleting release $RELEASE in namespace $NAMESPACE, with age $AGE_SECONDS."
                 helm -n $NAMESPACE delete $RELEASE

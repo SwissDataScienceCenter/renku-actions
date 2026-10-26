@@ -7,9 +7,6 @@ inputs:
   renku-release:
     description: "The name of the helm release."
     required: true
-  gitlab-token:
-    description: "A gitlab token used for the cleanup of application in Gitlab."
-    required: true
   s3-results-host:
     default: os.zhdk.cloud.switch.ch
     description: S3 host where the tests artifacts have been stored
@@ -32,7 +29,7 @@ runs:
   using: "composite"
   steps:
     - name: "Setup Helm"
-      uses: azure/setup-helm@v1
+      uses: azure/setup-helm@v5
       with:
         version: "3.6.3"
     - name: "Run tests"
@@ -44,7 +41,7 @@ runs:
         TEST_TIMEOUT_MINS: ${{ inputs.test-timeout-mins }}
     - name: Download artifact for packaging on failure
       if: failure()
-      uses: SwissDataScienceCenter/renku-actions/download-test-artifacts@v1.5.2
+      uses: SwissDataScienceCenter/renku-actions/download-test-artifacts@v1.21.0
       with:
         s3-results-host: ${{ inputs.s3-results-host }}
         s3-results-bucket: ${{ inputs.s3-results-bucket }}
@@ -53,7 +50,7 @@ runs:
         s3-results-artifacts-path: "tests-artifacts-${{ github.sha }}"
     - name: Upload screenshots on failure
       if: failure()
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: acceptance-test-artifacts
         path: ${{ github.workspace }}/test-artifacts/
