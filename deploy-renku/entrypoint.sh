@@ -24,6 +24,7 @@ yq eval '.global.renku.domain = strenv(FQDN)' -i $RENKU_VALUES_FILE
 yq eval '.ingress.hosts[0] = strenv(FQDN)' -i $RENKU_VALUES_FILE
 yq eval '.ingress.tls[0].hosts[0] = strenv(FQDN)' -i $RENKU_VALUES_FILE
 yq eval '.ingress.tls[0].secretName = strenv(TLS_SECRET_NAME)' -i $RENKU_VALUES_FILE
+yq eval '.sshProxy.domain = strenv(FQDN)' -i $RENKU_VALUES_FILE
 
 # Add ingress annotation only if ENABLE_NGINX_INGRESS is set
 if [ -n "$ENABLE_NGINX_INGRESS" ]; then
