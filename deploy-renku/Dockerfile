@@ -1,4 +1,4 @@
-FROM alpine/k8s:1.32.11
+FROM alpine/k8s:1.35.9
 
 # install dependencies
 COPY requirements.txt /
